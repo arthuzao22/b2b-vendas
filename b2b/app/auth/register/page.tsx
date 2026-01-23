@@ -54,9 +54,6 @@ export default function RegisterPage() {
         payload.cnpj = formData.cnpj;
         payload.descricao = formData.descricao;
       } else {
-        payload.razaoSocial = formData.razaoSocial;
-        payload.nomeFantasia = formData.nomeFantasia;
-        payload.cnpj = formData.cnpj;
         payload.endereco = formData.endereco;
         payload.cidade = formData.cidade;
         payload.estado = formData.estado;
@@ -80,7 +77,7 @@ export default function RegisterPage() {
       // Auto login after successful registration
       const signInResult = await signIn("credentials", {
         email: formData.email,
-        password: formData.senha,
+        senha: formData.senha,
         redirect: false,
       });
 

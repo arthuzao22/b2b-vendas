@@ -26,7 +26,7 @@ export default function LoginPage() {
     try {
       const result = await signIn("credentials", {
         email: formData.email,
-        password: formData.senha,
+        senha: formData.senha,
         redirect: false,
       });
 
