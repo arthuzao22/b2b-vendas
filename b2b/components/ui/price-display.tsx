@@ -21,12 +21,11 @@ export function PriceDisplay({
   showPrefix = false,
   size = "md",
 }: PriceDisplayProps) {
-  const formatted = formatCurrency(value);
+  const numValue = typeof value === "string" ? parseFloat(value) : value;
   
   return (
     <span className={cn("font-semibold text-primary", sizeClasses[size], className)}>
-      {showPrefix && "R$ "}
-      {formatted}
+      {formatCurrency(numValue)}
     </span>
   );
 }

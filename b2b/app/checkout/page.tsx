@@ -66,7 +66,7 @@ function CheckoutContent() {
             quantidade: item.quantidade,
             precoUnitario: item.preco,
           })),
-          observacoes,
+          observacoes: observacoes.trim() || null,
         }),
       });
 
