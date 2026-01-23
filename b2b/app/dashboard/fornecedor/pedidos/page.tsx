@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatCurrency, formatDate } from "@/lib/utils"
-import { ShoppingBag, Eye } from "lucide-react"
+import { ShoppingBag, Eye, X } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 interface Pedido {
   id: string
@@ -17,6 +24,22 @@ interface Pedido {
     razaoSocial: string
     cnpj: string
   }
+}
+
+interface PedidoDetalhado extends Pedido {
+  subtotal: number
+  desconto: number
+  frete: number
+  itens: Array<{
+    id: string
+    quantidade: number
+    precoUnitario: number
+    precoTotal: number
+    produto: {
+      nome: string
+      sku: string
+    }
+  }>
 }
 
 const statusColors: Record<string, "default" | "success" | "warning" | "destructive"> = {
@@ -43,6 +66,9 @@ export default function PedidosPage() {
   const [statusFilter, setStatusFilter] = useState<string>("todos")
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [selectedPedido, setSelectedPedido] = useState<PedidoDetalhado | null>(null)
+  const [loadingDetalhes, setLoadingDetalhes] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const perPage = 10
 
   useEffect(() => {
@@ -91,6 +117,33 @@ export default function PedidosPage() {
       console.error("Erro ao atualizar status:", error)
       alert("Erro ao atualizar status")
     }
+  }
+
+  const handleViewPedido = async (pedidoId: string) => {
+    try {
+      setLoadingDetalhes(true)
+      setIsDialogOpen(true)
+      const response = await fetch(`/api/pedidos/${pedidoId}`)
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setSelectedPedido(data.data)
+      } else {
+        alert("Erro ao carregar detalhes do pedido")
+        setIsDialogOpen(false)
+      }
+    } catch (error) {
+      console.error("Erro ao carregar detalhes:", error)
+      alert("Erro ao carregar detalhes")
+      setIsDialogOpen(false)
+    } finally {
+      setLoadingDetalhes(false)
+    }
+  }
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false)
+    setSelectedPedido(null)
   }
 
   const totalPages = Math.ceil(total / perPage)
@@ -203,7 +256,12 @@ export default function PedidosPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" title="Ver detalhes">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="Ver detalhes"
+                            onClick={() => handleViewPedido(pedido.id)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </div>
@@ -241,6 +299,99 @@ export default function PedidosPage() {
           </div>
         </div>
       )}
+
+      {/* Dialog for Order Details */}
+      <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Pedido</DialogTitle>
+            <DialogDescription>
+              Informações completas do pedido
+            </DialogDescription>
+          </DialogHeader>
+
+          {loadingDetalhes ? (
+            <div className="p-8 text-center text-muted-foreground">
+              Carregando detalhes...
+            </div>
+          ) : selectedPedido ? (
+            <div className="space-y-6">
+              {/* Order Header */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Número do Pedido</p>
+                  <p className="font-mono font-bold">{selectedPedido.numeroPedido}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Data</p>
+                  <p className="font-medium">{formatDate(selectedPedido.criadoEm)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cliente</p>
+                  <p className="font-medium">{selectedPedido.cliente.razaoSocial}</p>
+                  <p className="text-sm text-muted-foreground">{selectedPedido.cliente.cnpj}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <Badge variant={statusColors[selectedPedido.status]}>
+                    {statusLabels[selectedPedido.status]}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Order Items */}
+              <div>
+                <h3 className="font-semibold mb-4">Itens do Pedido</h3>
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-left p-3 text-sm font-medium">Produto</th>
+                        <th className="text-right p-3 text-sm font-medium">Qtd</th>
+                        <th className="text-right p-3 text-sm font-medium">Preço Unit.</th>
+                        <th className="text-right p-3 text-sm font-medium">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedPedido.itens.map((item) => (
+                        <tr key={item.id} className="border-t">
+                          <td className="p-3">
+                            <p className="font-medium">{item.produto.nome}</p>
+                            <p className="text-sm text-muted-foreground">SKU: {item.produto.sku}</p>
+                          </td>
+                          <td className="text-right p-3">{item.quantidade}</td>
+                          <td className="text-right p-3">{formatCurrency(item.precoUnitario)}</td>
+                          <td className="text-right p-3 font-medium">{formatCurrency(item.precoTotal)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              <div className="border-t pt-4 space-y-2">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>{formatCurrency(selectedPedido.subtotal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Desconto</span>
+                  <span className="text-green-600">-{formatCurrency(selectedPedido.desconto)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Frete</span>
+                  <span>{formatCurrency(selectedPedido.frete)}</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg border-t pt-2">
+                  <span>Total</span>
+                  <span>{formatCurrency(selectedPedido.total)}</span>
+                </div>
+              </div>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
