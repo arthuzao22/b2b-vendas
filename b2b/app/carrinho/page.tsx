@@ -1,17 +1,21 @@
 "use client";
 
+import { Suspense } from "react";
 import { useCart } from "@/hooks/useCart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PriceDisplay } from "@/components/ui/price-display";
 import { QuantitySelector } from "@/components/ui/quantity-selector";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ShoppingCart, Trash2, ArrowRight, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-export default function CarrinhoPage() {
+export const dynamic = 'force-dynamic';
+
+function CarrinhoContent() {
   const router = useRouter();
   const { items, total, subtotal, removeFromCart, updateItemQuantity, itemCount } = useCart();
 
@@ -169,5 +173,13 @@ export default function CarrinhoPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CarrinhoPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-8"><LoadingSkeleton className="h-96 w-full" /></div>}>
+      <CarrinhoContent />
+    </Suspense>
   );
 }

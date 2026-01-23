@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,10 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PriceDisplay } from "@/components/ui/price-display";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ShoppingCart, CreditCard, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
-export default function CheckoutPage() {
+export const dynamic = 'force-dynamic';
+
+function CheckoutContent() {
   const router = useRouter();
   const { items, total, clearCart, fornecedorId } = useCart();
   const { clienteId } = useAuth();
@@ -231,5 +234,13 @@ export default function CheckoutPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-8"><LoadingSkeleton className="h-96 w-full" /></div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
