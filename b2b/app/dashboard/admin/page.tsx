@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireAdmin } from "@/lib/api-helpers";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
+import { DashboardCharts } from "@/components/charts/dashboard-charts";
 import { Users, ShoppingBag, Package, TrendingUp, Building2, AlertCircle } from "lucide-react";
 
 interface AdminKPIs {
@@ -59,9 +60,58 @@ async function getAdminKPIs(): Promise<AdminKPIs> {
   };
 }
 
+async function getAdminChartData() {
+  const pedidos = await prisma.pedido.findMany({
+    select: {
+      criadoEm: true,
+      status: true,
+    },
+  });
+
+  // Orders by month (last 6 months)
+  const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const ordersByMonth = Array.from({ length: 6 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    return {
+      name: monthNames[date.getMonth()],
+      value: pedidos.filter(p => {
+        const orderMonth = new Date(p.criadoEm).getMonth();
+        const orderYear = new Date(p.criadoEm).getFullYear();
+        return orderMonth === date.getMonth() && orderYear === date.getFullYear();
+      }).length,
+    };
+  }).reverse();
+
+  // Orders by status
+  const statusLabels: Record<string, string> = {
+    pendente: "Pendente",
+    confirmado: "Confirmado",
+    em_preparacao: "Em Preparação",
+    enviado: "Enviado",
+    entregue: "Entregue",
+    cancelado: "Cancelado",
+  };
+
+  const statusCount = pedidos.reduce((acc, p) => {
+    acc[p.status] = (acc[p.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const ordersByStatus = Object.entries(statusCount).map(([status, value]) => ({
+    name: statusLabels[status as keyof typeof statusLabels] || status,
+    value,
+  }));
+
+  return { ordersByMonth, ordersByStatus };
+}
+
 export default async function AdminDashboard() {
   await requireAdmin();
-  const kpis = await getAdminKPIs();
+  const [kpis, chartData] = await Promise.all([
+    getAdminKPIs(),
+    getAdminChartData(),
+  ]);
 
   return (
     <div className="space-y-8">
@@ -228,6 +278,14 @@ export default async function AdminDashboard() {
             </a>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <DashboardCharts 
+          ordersByMonth={chartData.ordersByMonth}
+          ordersByStatus={chartData.ordersByStatus}
+        />
       </div>
     </div>
   );

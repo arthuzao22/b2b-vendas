@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { requireFornecedor } from "@/lib/api-helpers"
 import { prisma } from "@/lib/prisma"
 import { formatCurrency, formatDate } from "@/lib/utils"
+import { DashboardCharts } from "@/components/charts/dashboard-charts"
 import { 
   DollarSign, 
   ShoppingBag, 
@@ -98,6 +99,44 @@ async function getLowStockProducts(fornecedorId: string) {
   })
 }
 
+async function getChartData(fornecedorId: string) {
+  const pedidos = await prisma.pedido.findMany({
+    where: { fornecedorId },
+    select: {
+      criadoEm: true,
+      status: true,
+    },
+  });
+
+  // Orders by month (last 6 months)
+  const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  const ordersByMonth = Array.from({ length: 6 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() - i);
+    return {
+      name: monthNames[date.getMonth()],
+      value: pedidos.filter(p => {
+        const orderMonth = new Date(p.criadoEm).getMonth();
+        const orderYear = new Date(p.criadoEm).getFullYear();
+        return orderMonth === date.getMonth() && orderYear === date.getFullYear();
+      }).length,
+    };
+  }).reverse();
+
+  // Orders by status
+  const statusCount = pedidos.reduce((acc, p) => {
+    acc[p.status] = (acc[p.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const ordersByStatus = Object.entries(statusCount).map(([status, value]) => ({
+    name: statusLabels[status as keyof typeof statusLabels] || status,
+    value,
+  }));
+
+  return { ordersByMonth, ordersByStatus };
+}
+
 const statusColors: Record<string, "default" | "success" | "warning" | "destructive"> = {
   pendente: "warning",
   confirmado: "default",
@@ -119,10 +158,11 @@ const statusLabels: Record<string, string> = {
 export default async function FornecedorDashboard() {
   const { fornecedorId } = await requireFornecedor()
   
-  const [kpis, recentOrders, lowStockProducts] = await Promise.all([
+  const [kpis, recentOrders, lowStockProducts, chartData] = await Promise.all([
     getKPIs(fornecedorId),
     getRecentOrders(fornecedorId),
     getLowStockProducts(fornecedorId),
+    getChartData(fornecedorId),
   ])
 
   return (
@@ -287,6 +327,14 @@ export default async function FornecedorDashboard() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <DashboardCharts 
+          ordersByMonth={chartData.ordersByMonth}
+          ordersByStatus={chartData.ordersByStatus}
+        />
       </div>
     </div>
   )
