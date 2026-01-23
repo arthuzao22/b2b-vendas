@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ShoppingBag, AlertCircle, CheckCircle } from "lucide-react";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -77,6 +77,93 @@ export default function ResetPasswordPage() {
   };
 
   return (
+    <Card>
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold text-center">Redefinir senha</CardTitle>
+        <CardDescription className="text-center">
+          Digite sua nova senha
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {success ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 p-3 text-sm text-green-800 bg-green-50 border border-green-200 rounded-md">
+              <CheckCircle className="h-4 w-4" />
+              <span>
+                Senha redefinida com sucesso! Redirecionando para o login...
+              </span>
+            </div>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="flex items-center gap-2 p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-md">
+                <AlertCircle className="h-4 w-4" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium">
+                Nova Senha
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                required
+                disabled={loading || !token}
+                minLength={8}
+              />
+              <p className="text-xs text-muted-foreground">
+                Mínimo de 8 caracteres
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="confirmPassword" className="text-sm font-medium">
+                Confirmar Nova Senha
+              </label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="••••••••"
+                value={formData.confirmPassword}
+                onChange={(e) =>
+                  setFormData({ ...formData, confirmPassword: e.target.value })
+                }
+                required
+                disabled={loading || !token}
+                minLength={8}
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading || !token}
+            >
+              {loading ? "Redefinindo..." : "Redefinir senha"}
+            </Button>
+
+            <div className="text-center text-sm">
+              <Link href="/auth/login" className="text-primary hover:underline">
+                Voltar para o login
+              </Link>
+            </div>
+          </form>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
@@ -86,88 +173,9 @@ export default function ResetPasswordPage() {
           </Link>
         </div>
 
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Redefinir senha</CardTitle>
-            <CardDescription className="text-center">
-              Digite sua nova senha
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {success ? (
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 p-3 text-sm text-green-800 bg-green-50 border border-green-200 rounded-md">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>
-                    Senha redefinida com sucesso! Redirecionando para o login...
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <div className="flex items-center gap-2 p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-md">
-                    <AlertCircle className="h-4 w-4" />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <label htmlFor="password" className="text-sm font-medium">
-                    Nova Senha
-                  </label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    required
-                    disabled={loading || !token}
-                    minLength={8}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Mínimo de 8 caracteres
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="text-sm font-medium">
-                    Confirmar Nova Senha
-                  </label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
-                    value={formData.confirmPassword}
-                    onChange={(e) =>
-                      setFormData({ ...formData, confirmPassword: e.target.value })
-                    }
-                    required
-                    disabled={loading || !token}
-                    minLength={8}
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={loading || !token}
-                >
-                  {loading ? "Redefinindo..." : "Redefinir senha"}
-                </Button>
-
-                <div className="text-center text-sm">
-                  <Link href="/auth/login" className="text-primary hover:underline">
-                    Voltar para o login
-                  </Link>
-                </div>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+        <Suspense fallback={<Card><CardContent className="p-8 text-center">Carregando...</CardContent></Card>}>
+          <ResetPasswordForm />
+        </Suspense>
 
         <div className="mt-6 text-center">
           <Link href="/" className="text-sm text-muted-foreground hover:text-primary">
