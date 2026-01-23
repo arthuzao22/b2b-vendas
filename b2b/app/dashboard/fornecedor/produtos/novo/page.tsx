@@ -36,13 +36,14 @@ export default function NovoProdutoPage() {
 
   const fetchCategorias = async () => {
     try {
-      const response = await fetch("/api/categorias")
+      const response = await fetch("/api/categorias?flat=true")
       const data = await response.json()
       if (data.success) {
-        setCategorias(data.data)
+        setCategorias(Array.isArray(data.data?.categorias) ? data.data.categorias : [])
       }
     } catch (error) {
       console.error("Erro ao carregar categorias:", error)
+      setCategorias([])
     }
   }
 

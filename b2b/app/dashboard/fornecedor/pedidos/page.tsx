@@ -75,7 +75,7 @@ export default function PedidosPage() {
   const handleStatusChange = async (pedidoId: string, newStatus: string) => {
     try {
       const response = await fetch(`/api/pedidos/${pedidoId}/status`, {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
