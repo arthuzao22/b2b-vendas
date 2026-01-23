@@ -7,10 +7,10 @@ import { TipoUsuario, TipoDesconto } from "@prisma/client";
 // GET /api/produtos/[id]/preco - Calcular preço para cliente
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: produtoId } = params;
+    const { id: produtoId } = await params;
     const { searchParams } = new URL(request.url);
     const clienteIdParam = searchParams.get("clienteId");
 

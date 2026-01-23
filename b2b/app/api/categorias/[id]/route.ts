@@ -15,11 +15,12 @@ const updateCategoriaSchema = z.object({
 // GET /api/categorias/[id]
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const categoria = await prisma.categoria.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         categoriaPai: {
           select: {
@@ -60,13 +61,14 @@ export async function GET(
 // PUT /api/categorias/[id]
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     const categoria = await prisma.categoria.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!categoria) {
@@ -85,7 +87,7 @@ export async function PUT(
       const slugExists = await prisma.categoria.findFirst({
         where: {
           slug,
-          id: { not: params.id },
+          id: { not: id },
         },
       });
 
@@ -105,13 +107,13 @@ export async function PUT(
       }
 
       // Não permitir categoria ser pai de si mesma
-      if (validatedData.categoriaPaiId === params.id) {
+      if (validatedData.categoriaPaiId === id) {
         return errorResponse("Categoria não pode ser pai de si mesma", 400);
       }
     }
 
     const categoriaAtualizada = await prisma.categoria.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(validatedData.nome && { nome: validatedData.nome, slug }),
         ...(validatedData.descricao !== undefined && { descricao: validatedData.descricao }),
@@ -131,7 +133,7 @@ export async function PUT(
       },
     });
 
-    logger.info("Categoria atualizada", { categoriaId: params.id });
+    logger.info("Categoria atualizada", { categoriaId: id });
 
     return successResponse(categoriaAtualizada);
   } catch (error) {
@@ -147,13 +149,14 @@ export async function PUT(
 // DELETE /api/categorias/[id]
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireAuth();
+    const { id } = await params;
 
     const categoria = await prisma.categoria.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         _count: {
           select: {
@@ -184,10 +187,10 @@ export async function DELETE(
     }
 
     await prisma.categoria.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
-    logger.info("Categoria deletada", { categoriaId: params.id });
+    logger.info("Categoria deletada", { categoriaId: id });
 
     return successResponse({ message: "Categoria deletada com sucesso" });
   } catch (error) {

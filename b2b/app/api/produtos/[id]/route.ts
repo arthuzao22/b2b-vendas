@@ -35,10 +35,10 @@ const updateProdutoSchema = z.object({
 // GET /api/produtos/[id] - Obter detalhes do produto
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const produto = await prisma.produto.findUnique({
       where: { id },
@@ -87,11 +87,11 @@ export async function GET(
 // PUT /api/produtos/[id] - Atualizar produto (fornecedor only, own products)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { fornecedorId } = await requireFornecedor();
-    const { id } = params;
+    const { id } = await params;
 
     // Verificar se produto existe e pertence ao fornecedor
     const produtoExistente = await prisma.produto.findUnique({
@@ -228,11 +228,11 @@ export async function PUT(
 // DELETE /api/produtos/[id] - Deletar produto (fornecedor only, own products)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { fornecedorId } = await requireFornecedor();
-    const { id } = params;
+    const { id } = await params;
 
     // Verificar se produto existe e pertence ao fornecedor
     const produto = await prisma.produto.findUnique({
