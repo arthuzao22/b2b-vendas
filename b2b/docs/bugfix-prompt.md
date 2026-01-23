@@ -1,10 +1,10 @@
-# 🔧 Prompt de Correção: Sistema B2B Marketplace - Bugs Identificados
+# 🔧 Prompt de Correção v2: Sistema B2B Marketplace - Bugs e Melhorias
 
 ---
 
 ## 🎯 Contexto
 
-O sistema B2B Marketplace está em desenvolvimento com Next.js 16.1.4 (Turbopack). Durante os testes, foram identificados múltiplos erros no dashboard do fornecedor que impedem o uso adequado do sistema.
+O sistema B2B Marketplace está em desenvolvimento com Next.js 16.1.4 (Turbopack). Durante os testes, foram identificados múltiplos erros e páginas sem navegação adequada.
 
 **Ambiente:**
 - Next.js 16.1.4 (Turbopack)
@@ -16,274 +16,355 @@ O sistema B2B Marketplace está em desenvolvimento com Next.js 16.1.4 (Turbopack
 
 ## 🧩 Objetivo
 
-Corrigir TODOS os bugs identificados abaixo, além de implementar uma **navbar/sidebar de navegação** nas áreas onde está faltando. As correções devem:
-
-- Manter a arquitetura existente
-- Não alterar o schema Prisma
-- Não modificar estruturas de API que funcionam
-- Garantir type-safety completo
+1. **Implementar Navbar e Footer** em todas as páginas onde está faltando
+2. **Melhorar a experiência do Dashboard do Cliente** (layout, UX)
+3. **Corrigir todos os bugs** identificados no Dashboard do Fornecedor
 
 ---
 
-## 🐛 Bugs a Corrigir
+## 🧭 Parte 1: Navbar e Footer Faltando
 
-### Bug #1: Edição de Produto - 404
+### Páginas Afetadas
+
+| # | Rota | Tipo de Página | Navegação Necessária |
+|---|------|----------------|---------------------|
+| 1 | `/fornecedores` | Pública | Header público + Footer |
+| 2 | `/fornecedor/[slug]` | Pública | Header público + Footer |
+| 3 | `/dashboard/cliente` | Cliente autenticado | Header cliente + Sidebar cliente |
+| 4 | `/pedidos` | Cliente autenticado | Header cliente + Sidebar cliente |
+| 5 | `/pedidos/[id]` | Cliente autenticado | Header cliente + Sidebar cliente |
+
+### Correção Necessária
+
+#### 1. Verificar/Criar Layouts
+
+```
+app/
+├── (public)/
+│   ├── layout.tsx          ← VERIFICAR: deve ter Header público + Footer
+│   ├── fornecedores/
+│   └── fornecedor/[slug]/
+├── dashboard/
+│   └── cliente/
+│       └── layout.tsx      ← VERIFICAR: deve ter Header + Sidebar cliente
+├── pedidos/
+│   └── layout.tsx          ← CRIAR: mesmo layout do dashboard cliente
+```
+
+#### 2. Componentes de Navegação Necessários
+
+| Componente | Local | Funcionalidade |
+|------------|-------|----------------|
+| `Header` | `/components/header.tsx` | Navbar pública (logo, links, login/signup) |
+| `Footer` | `/components/footer.tsx` | Footer com links e copyright |
+| `ClientSidebar` | `/components/client-sidebar.tsx` | Sidebar para área do cliente |
+| `DashboardSidebar` | `/components/dashboard-sidebar.tsx` | Sidebar para fornecedor (já existe?) |
+
+#### 3. Links da Sidebar do Cliente
+
+```typescript
+const clienteLinks = [
+  { href: '/dashboard/cliente', label: 'Dashboard', icon: Home },
+  { href: '/dashboard/cliente/catalogo', label: 'Catálogo', icon: ShoppingBag },
+  { href: '/carrinho', label: 'Carrinho', icon: ShoppingCart },
+  { href: '/pedidos', label: 'Meus Pedidos', icon: Package },
+  { href: '/dashboard/cliente/configuracoes', label: 'Configurações', icon: Settings },
+]
+```
+
+---
+
+## 🎨 Parte 2: Melhorar Dashboard do Cliente
+
+### Problema
+
+A tela do cliente está "muito ruim" e precisa de melhorias visuais e funcionais.
+
+### Melhorias Necessárias
+
+#### Layout e Design
+
+1. **Adicionar Sidebar de navegação** (links listados acima)
+2. **Cards de resumo no topo:**
+   - Total de pedidos
+   - Pedidos em andamento
+   - Último pedido
+   - Total gasto (opcional)
+3. **Seção "Pedidos Recentes"** com tabela/cards
+4. **Seção "Ações Rápidas":**
+   - Ir para catálogo
+   - Ver carrinho
+   - Repetir último pedido
+5. **Design responsivo** e moderno (usar shadcn/ui)
+
+#### Exemplo de Estrutura
+
+```tsx
+export default function ClienteDashboard() {
+  return (
+    <div className="flex min-h-screen">
+      <ClientSidebar />
+      <main className="flex-1 p-6">
+        <h1 className="text-2xl font-bold mb-6">Bem-vindo, {cliente.nome}</h1>
+        
+        {/* KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>Total Pedidos: {stats.totalPedidos}</Card>
+          <Card>Em Andamento: {stats.emAndamento}</Card>
+          <Card>Último Pedido: {stats.ultimoPedido}</Card>
+          <Card>Total Gasto: {formatCurrency(stats.totalGasto)}</Card>
+        </div>
+        
+        {/* Pedidos Recentes */}
+        <Card>
+          <CardHeader>Pedidos Recentes</CardHeader>
+          <CardContent>
+            <Table>...</Table>
+          </CardContent>
+        </Card>
+        
+        {/* Ações Rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <Button asChild><Link href="/dashboard/cliente/catalogo">Ver Catálogo</Link></Button>
+          <Button asChild><Link href="/carrinho">Ver Carrinho</Link></Button>
+          <Button variant="outline">Repetir Último Pedido</Button>
+        </div>
+      </main>
+    </div>
+  )
+}
+```
+
+---
+
+## 🐛 Parte 3: Bugs do Dashboard Fornecedor
+
+### Bug #1: Edição de Produto - Permissão Negada
 
 **Rota:** `/dashboard/fornecedor/produtos/[id]/editar`
 
-**Erro:** Página retorna 404 ao tentar editar um produto
-
-**Causa Provável:** Rota dinâmica `[id]/editar/page.tsx` não existe
-
-**Correção Necessária:**
-1. Criar arquivo `/app/dashboard/fornecedor/produtos/[id]/editar/page.tsx`
-2. Implementar formulário de edição pre-populado com dados do produto
-3. Usar API `GET /api/produtos/:id` para carregar dados
-4. Usar API `PUT /api/produtos/:id` para salvar alterações
-
----
-
-### Bug #2: Cadastro de Produto - TypeError
-
-**Rota:** `/dashboard/fornecedor/produtos/novo`
-
-**Erro:** `categorias.map is not a function`
-
-**Stack Trace:**
-```
-at NovoProdutoPage (page.tsx:602:68)
-```
-
-**Causa:** A variável `categorias` está recebendo `undefined` ou um objeto ao invés de array
-
-**Correção Necessária:**
-1. Verificar fetch de categorias na página
-2. Garantir que a API `/api/categorias` retorna um array
-3. Adicionar fallback: `const categorias = data?.categorias || []`
-4. Adicionar loading state enquanto carrega categorias
-5. Tratar erro de API com try/catch
-
----
-
-### Bug #3: Atualização de Status do Pedido - 405
-
-**Rota:** `/dashboard/fornecedor/pedidos`  
-**API:** `PATCH /api/pedidos/[id]/status`
-
-**Erro:** `PATCH /api/pedidos/cmko8k9y0000sbkujjzce9aiu/status 405 (Method Not Allowed)`
-
-**Causa:** Método PATCH não está implementado na rota de API
-
-**Correção Necessária:**
-1. Verificar se existe `/app/api/pedidos/[id]/status/route.ts`
-2. Se não existir, criar a rota com handler PATCH
-3. Se existir, verificar se `export async function PATCH` está definido
-4. Implementar lógica de atualização de status do pedido
-
----
-
-### Bug #4: Visualização de Pedido - Modal Não Funciona
-
-**Rota:** `/dashboard/fornecedor/pedidos`
-
-**Erro:** Ao clicar para visualizar/ampliar pedido, nada acontece
-
-**Causa Provável:** 
-- Modal/Drawer não está implementado
-- Estado de abertura não está sendo gerenciado
-- Handler onClick não está conectado
-
-**Correção Necessária:**
-1. Implementar componente Dialog/Drawer para detalhes do pedido
-2. Adicionar estado para controlar abertura (`isOpen`, `selectedPedido`)
-3. Conectar onClick do botão "Visualizar" ao estado
-4. Buscar detalhes completos do pedido na abertura
-
----
-
-### Bug #5: Gestão de Clientes - Ações Não Funcionam
-
-**Rota:** `/dashboard/fornecedor/clientes`
-
-**Erros:**
-- Visualizar detalhes do cliente: não funciona
-- Editar cliente: não funciona
-- Adicionar cliente: não funciona
+**Erro:** "Você não tem permissão para editar este produto"
 
 **Causa Provável:**
-- Handlers de onClick não implementados
-- Modals/Drawers não existem
-- Rotas de navegação incorretas
+- Verificação de `fornecedorId` está falhando
+- Token JWT não contém `fornecedorId` correto
+- Comparação de IDs com tipos diferentes (string vs object)
 
 **Correção Necessária:**
-1. Implementar Modal/Drawer para visualizar detalhes do cliente
-2. Implementar Modal/formulário para edição de cliente
-3. Implementar Modal/formulário para adicionar novo cliente
-4. Conectar APIs:
-   - `GET /api/clientes/:id` - detalhes
-   - `PUT /api/clientes/:id` - edição
-   - `POST /api/clientes` - criação
-5. Verificar se cliente está associado ao fornecedor logado
+1. Verificar na página de edição como o `fornecedorId` da sessão está sendo obtido
+2. Verificar se a comparação é feita corretamente:
+   ```typescript
+   // ❌ ERRADO - pode falhar com objetos
+   if (produto.fornecedorId !== session.user.fornecedorId)
+   
+   // ✅ CORRETO - converter para string
+   if (String(produto.fornecedorId) !== String(session.user.fornecedorId))
+   ```
+3. Verificar se `session.user.fornecedorId` está definido (não `undefined`)
+4. Adicionar logs para debug:
+   ```typescript
+   console.log('Produto fornecedorId:', produto.fornecedorId)
+   console.log('Session fornecedorId:', session.user.fornecedorId)
+   ```
 
 ---
 
-### Bug #6: Categorias - TypeError
+### Bug #2: Atualização de Status do Pedido - Erro 422
 
-**Rota:** `/dashboard/fornecedor/categorias`
-
-**Erro:** `categorias.filter is not a function`
-
-**Stack Trace:**
-```
-at CategoriasPage (page.tsx:1445:60)
-```
-
-**Causa:** Variável `categorias` não é um array
-
-**Correção Necessária:**
-1. Verificar fetch de categorias do fornecedor
-2. Garantir que API retorna array
-3. Adicionar fallback: `const categorias = Array.isArray(data) ? data : []`
-4. Tratar loading e erro de API
-
----
-
-### Bug #7: Estoque - Server Component Error
-
-**Rota:** `/dashboard/fornecedor/estoque`
+**Rota:** `/dashboard/fornecedor/pedidos`  
+**API:** `PUT /api/pedidos/[id]/status`
 
 **Erro:** 
 ```
-Functions cannot be passed directly to Client Components unless you explicitly expose it by marking it with "use server".
-{key: ..., label: "Data", sortable: ..., render: function render}
+Erro de validação {"status":422,"errors":[{"path":"status","message":"Status inválido"}]}
 ```
 
-**Stack Trace:**
-```
-at EstoquePage (page.tsx:182:9)
-```
-
-**Causa:** Componente `DataTable` está recebendo funções (render) de um Server Component
+**Causa:** O valor do status sendo enviado não corresponde aos valores esperados pelo schema de validação
 
 **Correção Necessária:**
-1. Adicionar `'use client'` no topo da página de estoque
-2. OU separar a lógica em:
-   - Server Component para fetch de dados
-   - Client Component para DataTable com renders
-3. Mover definição de `columns` com funções `render` para Client Component
-4. Alternativamente, passar dados já renderizados (strings/JSX.Element) ao invés de funções
+1. Verificar quais valores o schema Zod da API aceita:
+   ```typescript
+   // Provavelmente espera valores do enum StatusPedido
+   enum StatusPedido {
+     pendente = 'pendente',
+     confirmado = 'confirmado',
+     processando = 'processando',
+     enviado = 'enviado',
+     entregue = 'entregue',
+     cancelado = 'cancelado'
+   }
+   ```
+2. Verificar o que o frontend está enviando:
+   - Pode estar enviando `"Confirmado"` ao invés de `"confirmado"` (case sensitive)
+   - Pode estar enviando um valor do label e não do enum
+3. Corrigir o select/dropdown para enviar o valor correto:
+   ```typescript
+   // ❌ ERRADO
+   <option value="Confirmado">Confirmado</option>
+   
+   // ✅ CORRETO
+   <option value="confirmado">Confirmado</option>
+   ```
+4. Verificar o body da requisição antes de enviar
 
 ---
 
-### Bug #8: Preços - TypeError no DataTable
+### Bug #3: Modal de Clientes Transparente
+
+**Rota:** `/dashboard/fornecedor/clientes`
+
+**Erro:** Modal de visualizar/editar cliente aparece transparente
+
+**Causa Provável:**
+- CSS do Dialog/Modal sem background
+- Overlay não configurado
+- Z-index conflitante
+
+**Correção Necessária:**
+1. Verificar se o componente Dialog está usando shadcn/ui corretamente
+2. Adicionar overlay com background:
+   ```tsx
+   <Dialog>
+     <DialogOverlay className="fixed inset-0 bg-black/50" />
+     <DialogContent className="bg-white dark:bg-gray-900 ...">
+       {/* conteúdo */}
+     </DialogContent>
+   </Dialog>
+   ```
+3. Se usar shadcn/ui Dialog, verificar se o CSS está importado
+4. Adicionar classes de background ao DialogContent:
+   ```tsx
+   <DialogContent className="bg-white border shadow-lg">
+   ```
+
+---
+
+### Bug #4: Input Não Controlado para Controlado
 
 **Rota:** `/dashboard/fornecedor/precos`
 
-**Erro:** `sortedData.map is not a function`
-
-**Stack Trace:**
+**Erro:** 
 ```
-at DataTable (page.tsx:416:54)
-at PrecosPage (page.tsx:1404:244)
+A component is changing an uncontrolled input to be controlled. 
+This is likely caused by the value changing from undefined to a defined value.
 ```
 
-**Causa:** `sortedData` não é um array (provavelmente `undefined`)
+**Causa:** Um input está recebendo `value={undefined}` inicialmente e depois um valor definido
 
 **Correção Necessária:**
-1. Verificar fetch de listas de preço
-2. Garantir que componente `DataTable` recebe `data` como array
-3. No `DataTable`, adicionar validação:
+1. Inicializar todos os valores de estado com valores vazios, não `undefined`:
    ```typescript
-   const sortedData = Array.isArray(data) ? [...data].sort(...) : []
+   // ❌ ERRADO
+   const [nome, setNome] = useState()
+   const [preco, setPreco] = useState()
+   
+   // ✅ CORRETO
+   const [nome, setNome] = useState('')
+   const [preco, setPreco] = useState('')
    ```
-4. Adicionar prop validation no DataTable para garantir array
 
----
+2. Para formulários com objeto, garantir valores padrão:
+   ```typescript
+   // ❌ ERRADO
+   const [formData, setFormData] = useState({})
+   
+   // ✅ CORRETO
+   const [formData, setFormData] = useState({
+     nome: '',
+     descricao: '',
+     valorDesconto: '',
+     tipoDesconto: 'percentual'
+   })
+   ```
 
-## 🧭 Navbar/Sidebar Faltando
+3. Para inputs que podem vir de API, usar fallback:
+   ```tsx
+   <input value={item?.nome ?? ''} onChange={...} />
+   ```
 
-**Problema:** Algumas páginas não possuem navegação lateral consistente
-
-**Correção Necessária:**
-1. Verificar se existe `/components/dashboard-sidebar.tsx`
-2. Garantir que o layout `/app/dashboard/fornecedor/layout.tsx` inclui a sidebar
-3. Verificar que todas as sub-rotas herdam o layout
-4. A sidebar deve conter links para:
-   - Dashboard (home)
-   - Produtos
-   - Categorias
-   - Pedidos
-   - Estoque
-   - Preços
-   - Clientes
-   - Configurações
+4. No DataTable, verificar inputs de busca/filtro:
+   ```tsx
+   // ✅ CORRETO
+   const [searchTerm, setSearchTerm] = useState('')
+   
+   <input 
+     value={searchTerm} 
+     onChange={(e) => setSearchTerm(e.target.value)}
+   />
+   ```
 
 ---
 
 ## 🏗️ Diretrizes Técnicas
 
-### Padrão de Fetch de Dados
+### Estrutura de Layouts
+
+```
+app/
+├── layout.tsx                    # Layout raiz (providers, fonts)
+├── (public)/
+│   └── layout.tsx               # Header público + Footer
+├── (auth)/
+│   └── layout.tsx               # Minimalista (login/register)
+├── dashboard/
+│   ├── fornecedor/
+│   │   └── layout.tsx           # Sidebar fornecedor
+│   └── cliente/
+│       └── layout.tsx           # Sidebar cliente
+├── pedidos/
+│   └── layout.tsx               # Mesmo que dashboard/cliente
+├── carrinho/
+│   └── layout.tsx               # Mesmo que dashboard/cliente
+└── checkout/
+    └── layout.tsx               # Minimalista (foco no checkout)
+```
+
+### Padrão de Input Controlado
 
 ```typescript
-// ✅ CORRETO - Com fallback e tratamento de erro
-async function getData() {
-  try {
-    const res = await fetch('/api/endpoint')
-    if (!res.ok) throw new Error('Failed to fetch')
-    const data = await res.json()
-    return Array.isArray(data) ? data : data?.items || []
-  } catch (error) {
-    console.error(error)
-    return []
+// Hook de formulário recomendado
+function useForm<T>(initialValues: T) {
+  const [values, setValues] = useState<T>(initialValues)
+  
+  const handleChange = (field: keyof T) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setValues(prev => ({ ...prev, [field]: e.target.value }))
   }
+  
+  return { values, setValues, handleChange }
 }
+
+// Uso
+const { values, handleChange } = useForm({
+  nome: '',
+  descricao: '',
+  preco: ''
+})
+
+<input value={values.nome} onChange={handleChange('nome')} />
 ```
 
-### Padrão Server vs Client Components
+### Padrão de Modal/Dialog
 
-```typescript
-// Server Component - Fetch dados
-// app/dashboard/fornecedor/estoque/page.tsx
-import { EstoqueClient } from './estoque-client'
+```tsx
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 
-export default async function EstoquePage() {
-  const movimentacoes = await getMovimentacoes()
-  return <EstoqueClient movimentacoes={movimentacoes} />
-}
-
-// Client Component - Interatividade
-// app/dashboard/fornecedor/estoque/estoque-client.tsx
-'use client'
-
-export function EstoqueClient({ movimentacoes }) {
-  const columns = [
-    { key: 'data', label: 'Data', render: (row) => formatDate(row.criadoEm) }
-  ]
-  return <DataTable data={movimentacoes} columns={columns} />
-}
-```
-
-### Padrão de DataTable Defensivo
-
-```typescript
-// components/ui/data-table.tsx
-'use client'
-
-interface DataTableProps<T> {
-  data: T[]
-  columns: Column<T>[]
-}
-
-export function DataTable<T>({ data, columns }: DataTableProps<T>) {
-  // Garantir que data é array
-  const safeData = Array.isArray(data) ? data : []
-  
-  const sortedData = useMemo(() => {
-    return [...safeData].sort(...)
-  }, [safeData, sortConfig])
-  
-  // ...
-}
+<Dialog open={isOpen} onOpenChange={setIsOpen}>
+  <DialogContent className="sm:max-w-[425px] bg-white">
+    <DialogHeader>
+      <DialogTitle>Título</DialogTitle>
+      <DialogDescription>Descrição</DialogDescription>
+    </DialogHeader>
+    {/* Conteúdo */}
+  </DialogContent>
+</Dialog>
 ```
 
 ---
@@ -292,59 +373,46 @@ export function DataTable<T>({ data, columns }: DataTableProps<T>) {
 
 1. ❌ NÃO modificar `/prisma/schema.prisma`
 2. ❌ NÃO alterar `/lib/auth.ts`
-3. ❌ NÃO modificar APIs funcionais
-4. ❌ NÃO mudar estrutura de pastas
-5. ❌ NÃO trocar componentes shadcn/ui
+3. ❌ NÃO mudar valores do enum `StatusPedido` no schema
+4. ❌ NÃO remover validações de permissão, apenas corrigir
+5. ❌ NÃO usar inline styles, usar Tailwind CSS
 
 ---
 
 ## ✅ Critérios de Aceitação
 
-### Rotas de Produtos
-- [ ] `/dashboard/fornecedor/produtos/novo` carrega sem erro
-- [ ] `/dashboard/fornecedor/produtos/[id]/editar` existe e funciona
-- [ ] Formulários salvam dados corretamente
-
-### Rota de Pedidos
-- [ ] Atualização de status funciona (PATCH 200)
-- [ ] Modal de visualização de pedido abre
-- [ ] Detalhes do pedido são exibidos
-
-### Rota de Clientes
-- [ ] Visualizar detalhes do cliente funciona
-- [ ] Editar cliente funciona
-- [ ] Adicionar cliente funciona
-
-### Rota de Categorias
-- [ ] Página carrega sem `TypeError`
-- [ ] Lista categorias corretamente
-- [ ] CRUD funciona
-
-### Rota de Estoque
-- [ ] Página carrega sem erro de Server/Client Component
-- [ ] DataTable renderiza movimentações
-- [ ] Filtros funcionam
-
-### Rota de Preços
-- [ ] Página carrega sem `TypeError`
-- [ ] DataTable renderiza listas de preço
-- [ ] CRUD funciona
-
 ### Navegação
-- [ ] Sidebar presente em todas as páginas do dashboard fornecedor
-- [ ] Links de navegação funcionam
-- [ ] Destaque visual na página atual
+- [ ] `/fornecedores` tem Header público e Footer
+- [ ] `/fornecedor/[slug]` tem Header público e Footer
+- [ ] `/dashboard/cliente` tem Header e Sidebar do cliente
+- [ ] `/pedidos` tem Header e Sidebar do cliente
+- [ ] `/pedidos/[id]` tem Header e Sidebar do cliente
+- [ ] Todas as páginas têm navegação consistente
+
+### Dashboard Cliente
+- [ ] Layout melhorado com cards de KPIs
+- [ ] Sidebar de navegação funcional
+- [ ] Pedidos recentes visíveis
+- [ ] Ações rápidas disponíveis
+- [ ] Design responsivo
+
+### Bugs Fornecedor
+- [ ] Edição de produto funciona (sem erro de permissão)
+- [ ] Atualização de status de pedido funciona (sem erro 422)
+- [ ] Modal de clientes tem background visível
+- [ ] Página de preços sem erro de input controlado
 
 ---
 
 ## 📋 Ordem de Execução Recomendada
 
-1. **Primeiro:** Corrigir componente `DataTable` para ser defensivo (Bugs #7, #8)
-2. **Segundo:** Corrigir fetches de categorias (Bugs #2, #6)
-3. **Terceiro:** Criar rota de edição de produto (Bug #1)
-4. **Quarto:** Implementar PATCH de status de pedido (Bug #3)
-5. **Quinto:** Implementar modals de visualização (Bugs #4, #5)
-6. **Sexto:** Verificar sidebar/navegação
+1. **Primeiro:** Criar/ajustar layouts com navbar e footer
+2. **Segundo:** Implementar ClientSidebar e adicionar aos layouts
+3. **Terceiro:** Melhorar dashboard do cliente
+4. **Quarto:** Corrigir bug de permissão de edição de produto
+5. **Quinto:** Corrigir validação de status de pedido
+6. **Sexto:** Corrigir CSS do modal de clientes
+7. **Sétimo:** Corrigir inputs controlados na página de preços
 
 ---
 
