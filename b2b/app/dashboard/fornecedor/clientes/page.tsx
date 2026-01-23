@@ -4,8 +4,17 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Users, Plus, Search, Eye, Edit } from "lucide-react"
+import { Users, Plus, Search, Eye, Edit, X } from "lucide-react"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
 interface Cliente {
   id: string
@@ -16,8 +25,11 @@ interface Cliente {
   telefone: string
   cidade: string
   estado: string
+  endereco?: string
+  cep?: string
   ativo: boolean
   listaPreco?: {
+    id: string
     nome: string
   }
 }
@@ -28,6 +40,22 @@ export default function ClientesPage() {
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
+  const [formData, setFormData] = useState({
+    razaoSocial: "",
+    nomeFantasia: "",
+    cnpj: "",
+    email: "",
+    telefone: "",
+    endereco: "",
+    cidade: "",
+    estado: "",
+    cep: "",
+  })
+  const [saving, setSaving] = useState(false)
   const perPage = 10
 
   useEffect(() => {
@@ -57,6 +85,83 @@ export default function ClientesPage() {
     }
   }
 
+  const handleViewCliente = (cliente: Cliente) => {
+    setSelectedCliente(cliente)
+    setIsViewDialogOpen(true)
+  }
+
+  const handleEditCliente = (cliente: Cliente) => {
+    setSelectedCliente(cliente)
+    setFormData({
+      razaoSocial: cliente.razaoSocial,
+      nomeFantasia: cliente.nomeFantasia,
+      cnpj: cliente.cnpj,
+      email: cliente.email,
+      telefone: cliente.telefone,
+      endereco: cliente.endereco || "",
+      cidade: cliente.cidade,
+      estado: cliente.estado,
+      cep: cliente.cep || "",
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const handleAddCliente = () => {
+    setSelectedCliente(null)
+    setFormData({
+      razaoSocial: "",
+      nomeFantasia: "",
+      cnpj: "",
+      email: "",
+      telefone: "",
+      endereco: "",
+      cidade: "",
+      estado: "",
+      cep: "",
+    })
+    setIsAddDialogOpen(true)
+  }
+
+  const handleSaveCliente = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+
+    try {
+      const url = selectedCliente 
+        ? `/api/clientes/${selectedCliente.id}` 
+        : `/api/clientes`
+      
+      const response = await fetch(url, {
+        method: selectedCliente ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        await fetchClientes()
+        setIsEditDialogOpen(false)
+        setIsAddDialogOpen(false)
+        setSelectedCliente(null)
+      } else {
+        alert(data.error || "Erro ao salvar cliente")
+      }
+    } catch (error) {
+      console.error("Erro ao salvar cliente:", error)
+      alert("Erro ao salvar cliente")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
   const totalPages = Math.ceil(total / perPage)
 
   return (
@@ -68,7 +173,7 @@ export default function ClientesPage() {
             Gerencie seus clientes e suas listas de preço
           </p>
         </div>
-        <Button>
+        <Button onClick={handleAddCliente}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Cliente
         </Button>
@@ -111,7 +216,7 @@ export default function ClientesPage() {
                 {search ? "Nenhum cliente encontrado" : "Nenhum cliente cadastrado"}
               </p>
               {!search && (
-                <Button className="mt-4">
+                <Button className="mt-4" onClick={handleAddCliente}>
                   <Plus className="mr-2 h-4 w-4" />
                   Adicionar Primeiro Cliente
                 </Button>
@@ -178,10 +283,20 @@ export default function ClientesPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" title="Ver detalhes">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="Ver detalhes"
+                            onClick={() => handleViewCliente(cliente)}
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" title="Editar">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="Editar"
+                            onClick={() => handleEditCliente(cliente)}
+                          >
                             <Edit className="h-4 w-4" />
                           </Button>
                         </div>
@@ -219,6 +334,224 @@ export default function ClientesPage() {
           </div>
         </div>
       )}
+
+      {/* View Client Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Detalhes do Cliente</DialogTitle>
+            <DialogDescription>
+              Informações completas do cliente
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedCliente && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Razão Social</p>
+                  <p className="font-medium">{selectedCliente.razaoSocial}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Nome Fantasia</p>
+                  <p className="font-medium">{selectedCliente.nomeFantasia || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">CNPJ</p>
+                  <p className="font-mono">{selectedCliente.cnpj}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Status</p>
+                  <Badge variant={selectedCliente.ativo ? "success" : "secondary"}>
+                    {selectedCliente.ativo ? "Ativo" : "Inativo"}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Email</p>
+                  <p className="font-medium">{selectedCliente.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Telefone</p>
+                  <p className="font-medium">{selectedCliente.telefone}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-sm text-muted-foreground">Endereço</p>
+                  <p className="font-medium">{selectedCliente.endereco || "-"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Cidade</p>
+                  <p className="font-medium">{selectedCliente.cidade}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Estado</p>
+                  <p className="font-medium">{selectedCliente.estado}</p>
+                </div>
+                {selectedCliente.cep && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">CEP</p>
+                    <p className="font-medium">{selectedCliente.cep}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-muted-foreground">Lista de Preço</p>
+                  <p className="font-medium">
+                    {selectedCliente.listaPreco?.nome || "Sem lista atribuída"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit/Add Client Dialog */}
+      <Dialog open={isEditDialogOpen || isAddDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsEditDialogOpen(false)
+          setIsAddDialogOpen(false)
+        }
+      }}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedCliente ? "Editar Cliente" : "Novo Cliente"}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedCliente ? "Atualize as informações do cliente" : "Adicione um novo cliente"}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveCliente} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="razaoSocial">
+                  Razão Social <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="razaoSocial"
+                  name="razaoSocial"
+                  value={formData.razaoSocial}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="nomeFantasia">Nome Fantasia</Label>
+                <Input
+                  id="nomeFantasia"
+                  name="nomeFantasia"
+                  value={formData.nomeFantasia}
+                  onChange={handleFormChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cnpj">
+                  CNPJ <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="cnpj"
+                  name="cnpj"
+                  value={formData.cnpj}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="email">
+                  Email <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="telefone">
+                  Telefone <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="telefone"
+                  name="telefone"
+                  value={formData.telefone}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cep">CEP</Label>
+                <Input
+                  id="cep"
+                  name="cep"
+                  value={formData.cep}
+                  onChange={handleFormChange}
+                />
+              </div>
+
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="endereco">Endereço</Label>
+                <Input
+                  id="endereco"
+                  name="endereco"
+                  value={formData.endereco}
+                  onChange={handleFormChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="cidade">
+                  Cidade <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="cidade"
+                  name="cidade"
+                  value={formData.cidade}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="estado">
+                  Estado <span className="text-destructive">*</span>
+                </Label>
+                <Input
+                  id="estado"
+                  name="estado"
+                  value={formData.estado}
+                  onChange={handleFormChange}
+                  maxLength={2}
+                  required
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setIsEditDialogOpen(false)
+                  setIsAddDialogOpen(false)
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={saving}>
+                {saving ? "Salvando..." : "Salvar"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

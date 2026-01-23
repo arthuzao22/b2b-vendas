@@ -52,10 +52,11 @@ export default function PrecosPage() {
       const response = await fetch("/api/listas-preco");
       if (response.ok) {
         const data = await response.json();
-        setListas(data.data || []);
+        setListas(Array.isArray(data.data) ? data.data : []);
       }
     } catch (error) {
       console.error("Error fetching listas:", error);
+      setListas([]);
     } finally {
       setLoading(false);
     }

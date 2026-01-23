@@ -47,6 +47,9 @@ export function DataTable<T extends Record<string, any>>({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Ensure data is always an array
+  const safeData = Array.isArray(data) ? data : [];
+
   const handleSort = (key: string) => {
     if (sortKey === key) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
@@ -62,7 +65,7 @@ export function DataTable<T extends Record<string, any>>({
   };
 
   const sortedData = sortKey
-    ? [...data].sort((a, b) => {
+    ? [...safeData].sort((a, b) => {
         const aValue = a[sortKey];
         const bValue = b[sortKey];
         const order = sortOrder === 'asc' ? 1 : -1;
@@ -75,7 +78,7 @@ export function DataTable<T extends Record<string, any>>({
         }
         return 0;
       })
-    : data;
+    : safeData;
 
   if (loading) {
     return (
@@ -94,7 +97,7 @@ export function DataTable<T extends Record<string, any>>({
     );
   }
 
-  if (data.length === 0 && !searchQuery) {
+  if (safeData.length === 0 && !searchQuery) {
     return (
       <div className="space-y-4">
         {searchable && (

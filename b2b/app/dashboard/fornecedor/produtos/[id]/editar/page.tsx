@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,9 +14,24 @@ interface Categoria {
   nome: string
 }
 
-export default function NovoProdutoPage() {
+interface Produto {
+  id: string
+  nome: string
+  sku: string
+  descricao?: string
+  precoBase: string
+  categoriaId?: string
+  quantidadeEstoque: number
+  estoqueMinimo: number
+  unidadeMedida: string
+}
+
+export default function EditarProdutoPage() {
   const router = useRouter()
+  const params = useParams()
+  const produtoId = params.id as string
   const [loading, setLoading] = useState(false)
+  const [loadingProduto, setLoadingProduto] = useState(true)
   const [categorias, setCategorias] = useState<Categoria[]>([])
   const [formData, setFormData] = useState({
     nome: "",
@@ -32,6 +47,7 @@ export default function NovoProdutoPage() {
 
   useEffect(() => {
     fetchCategorias()
+    fetchProduto()
   }, [])
 
   const fetchCategorias = async () => {
@@ -44,6 +60,37 @@ export default function NovoProdutoPage() {
     } catch (error) {
       console.error("Erro ao carregar categorias:", error)
       setCategorias([])
+    }
+  }
+
+  const fetchProduto = async () => {
+    try {
+      setLoadingProduto(true)
+      const response = await fetch(`/api/produtos/${produtoId}`)
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        const produto: Produto = data.data
+        setFormData({
+          nome: produto.nome,
+          sku: produto.sku,
+          descricao: produto.descricao || "",
+          precoBase: produto.precoBase,
+          categoriaId: produto.categoriaId || "",
+          quantidadeEstoque: produto.quantidadeEstoque.toString(),
+          estoqueMinimo: produto.estoqueMinimo.toString(),
+          unidadeMedida: produto.unidadeMedida || "UN",
+        })
+      } else {
+        alert(data.error || "Erro ao carregar produto")
+        router.push("/dashboard/fornecedor/produtos")
+      }
+    } catch (error) {
+      console.error("Erro ao carregar produto:", error)
+      alert("Erro ao carregar produto")
+      router.push("/dashboard/fornecedor/produtos")
+    } finally {
+      setLoadingProduto(false)
     }
   }
 
@@ -92,8 +139,8 @@ export default function NovoProdutoPage() {
     setLoading(true)
 
     try {
-      const response = await fetch("/api/produtos", {
-        method: "POST",
+      const response = await fetch(`/api/produtos/${produtoId}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -110,14 +157,41 @@ export default function NovoProdutoPage() {
       if (response.ok && data.success) {
         router.push("/dashboard/fornecedor/produtos")
       } else {
-        alert(data.error || "Erro ao criar produto")
+        alert(data.error || "Erro ao atualizar produto")
       }
     } catch (error) {
-      console.error("Erro ao criar produto:", error)
-      alert("Erro ao criar produto")
+      console.error("Erro ao atualizar produto:", error)
+      alert("Erro ao atualizar produto")
     } finally {
       setLoading(false)
     }
+  }
+
+  if (loadingProduto) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/fornecedor/produtos">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Editar Produto</h1>
+            <p className="text-muted-foreground">
+              Carregando...
+            </p>
+          </div>
+        </div>
+        <Card>
+          <CardContent className="p-8">
+            <div className="text-center text-muted-foreground">
+              Carregando dados do produto...
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
@@ -129,9 +203,9 @@ export default function NovoProdutoPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Novo Produto</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Editar Produto</h1>
           <p className="text-muted-foreground">
-            Adicione um novo produto ao seu catálogo
+            Atualize as informações do produto
           </p>
         </div>
       </div>
@@ -141,7 +215,7 @@ export default function NovoProdutoPage() {
           <CardHeader>
             <CardTitle>Informações do Produto</CardTitle>
             <CardDescription>
-              Preencha os campos abaixo para cadastrar um novo produto
+              Atualize os campos abaixo para modificar o produto
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -312,7 +386,7 @@ export default function NovoProdutoPage() {
                 </Button>
               </Link>
               <Button type="submit" disabled={loading}>
-                {loading ? "Salvando..." : "Salvar Produto"}
+                {loading ? "Salvando..." : "Atualizar Produto"}
               </Button>
             </div>
           </CardContent>
