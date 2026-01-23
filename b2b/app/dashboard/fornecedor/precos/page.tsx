@@ -38,7 +38,7 @@ export default function PrecosPage() {
     descricao: "",
     dataInicio: "",
     dataFim: "",
-    descontoPercentual: "0",
+    descontoPercentual: "",
     ativa: true,
   });
 
@@ -75,7 +75,7 @@ export default function PrecosPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          descontoPercentual: parseFloat(formData.descontoPercentual),
+          descontoPercentual: parseFloat(formData.descontoPercentual || "0"),
         }),
       });
 
@@ -125,7 +125,7 @@ export default function PrecosPage() {
       descricao: "",
       dataInicio: "",
       dataFim: "",
-      descontoPercentual: "0",
+      descontoPercentual: "",
       ativa: true,
     });
   };

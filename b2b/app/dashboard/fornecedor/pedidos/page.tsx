@@ -45,7 +45,7 @@ interface PedidoDetalhado extends Pedido {
 const statusColors: Record<string, "default" | "success" | "warning" | "destructive"> = {
   pendente: "warning",
   confirmado: "default",
-  em_preparacao: "default",
+  processando: "default",
   enviado: "default",
   entregue: "success",
   cancelado: "destructive",
@@ -54,7 +54,7 @@ const statusColors: Record<string, "default" | "success" | "warning" | "destruct
 const statusLabels: Record<string, string> = {
   pendente: "Pendente",
   confirmado: "Confirmado",
-  em_preparacao: "Em Preparação",
+  processando: "Processando",
   enviado: "Enviado",
   entregue: "Entregue",
   cancelado: "Cancelado",
@@ -152,7 +152,7 @@ export default function PedidosPage() {
     { value: "todos", label: "Todos" },
     { value: "pendente", label: "Pendente" },
     { value: "confirmado", label: "Confirmado" },
-    { value: "em_preparacao", label: "Em Preparação" },
+    { value: "processando", label: "Processando" },
     { value: "enviado", label: "Enviado" },
     { value: "entregue", label: "Entregue" },
     { value: "cancelado", label: "Cancelado" },
@@ -245,7 +245,7 @@ export default function PedidosPage() {
                         >
                           <option value="pendente">Pendente</option>
                           <option value="confirmado">Confirmado</option>
-                          <option value="em_preparacao">Em Preparação</option>
+                          <option value="processando">Processando</option>
                           <option value="enviado">Enviado</option>
                           <option value="entregue">Entregue</option>
                           <option value="cancelado">Cancelado</option>

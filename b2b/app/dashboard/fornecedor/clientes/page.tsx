@@ -337,7 +337,7 @@ export default function ClientesPage() {
 
       {/* View Client Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
           <DialogHeader>
             <DialogTitle>Detalhes do Cliente</DialogTitle>
             <DialogDescription>
@@ -411,7 +411,7 @@ export default function ClientesPage() {
           setIsAddDialogOpen(false)
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-900">
           <DialogHeader>
             <DialogTitle>
               {selectedCliente ? "Editar Cliente" : "Novo Cliente"}

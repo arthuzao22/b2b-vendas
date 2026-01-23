@@ -102,7 +102,12 @@ export async function PUT(
       return errorResponse("Produto não encontrado", 404);
     }
 
-    if (produtoExistente.fornecedorId !== fornecedorId) {
+    // Convert both IDs to strings for comparison to avoid type mismatch
+    if (String(produtoExistente.fornecedorId) !== String(fornecedorId)) {
+      logger.warn("Permission denied for product edit", {
+        produtoFornecedorId: produtoExistente.fornecedorId,
+        sessionFornecedorId: fornecedorId,
+      });
       return errorResponse("Você não tem permissão para editar este produto", 403);
     }
 
@@ -243,7 +248,8 @@ export async function DELETE(
       return errorResponse("Produto não encontrado", 404);
     }
 
-    if (produto.fornecedorId !== fornecedorId) {
+    // Convert both IDs to strings for comparison to avoid type mismatch
+    if (String(produto.fornecedorId) !== String(fornecedorId)) {
       return errorResponse("Você não tem permissão para excluir este produto", 403);
     }
 
