@@ -1,0 +1,367 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum TipoUsuario {
+  admin
+  fornecedor
+  cliente
+}
+
+enum StatusPedido {
+  pendente
+  confirmado
+  processando
+  enviado
+  entregue
+  cancelado
+}
+
+enum TipoMovimentacao {
+  entrada
+  saida
+  ajuste
+}
+
+enum TipoDesconto {
+  percentual
+  fixo
+}
+
+enum EmailStatus {
+  pending
+  sent
+  failed
+  bounced
+  delivered
+  opened
+  clicked
+}
+
+// ==========================================
+// MODELOS
+// ==========================================
+
+model Usuario {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  senha         String
+  nome          String
+  tipo          TipoUsuario  @default(cliente)
+  telefone      String?
+  avatar        String?
+  ativo         Boolean      @default(true)
+  criadoEm      DateTime     @default(now()) @map("criado_em")
+  atualizadoEm  DateTime     @updatedAt @map("atualizado_em")
+
+  fornecedor    Fornecedor?
+  cliente       Cliente?
+  notificacoes  Notificacao[]
+  auditLogs     AuditLog[]
+
+  @@map("usuarios")
+}
+
+model Fornecedor {
+  id              String    @id @default(cuid())
+  usuarioId       String    @unique @map("usuario_id")
+  usuario         Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  razaoSocial     String    @map("razao_social")
+  nomeFantasia    String?   @map("nome_fantasia")
+  slug            String    @unique
+  cnpj            String    @unique
+  descricao       String?
+  logo            String?
+  banner          String?
+  endereco        String?
+  cidade          String?
+  estado          String?
+  cep             String?
+  verificado      Boolean   @default(false)
+  criadoEm        DateTime  @default(now()) @map("criado_em")
+  atualizadoEm    DateTime  @updatedAt @map("atualizado_em")
+
+  produtos        Produto[]
+  pedidos         Pedido[]
+  listasPreco     ListaPreco[]
+  clientes        ClienteFornecedor[]
+
+  @@map("fornecedores")
+}
+
+model Cliente {
+  id                String    @id @default(cuid())
+  usuarioId         String    @unique @map("usuario_id")
+  usuario           Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  razaoSocial       String    @map("razao_social")
+  nomeFantasia      String?   @map("nome_fantasia")
+  cnpj              String    @unique
+  inscricaoEstadual String?   @map("inscricao_estadual")
+  endereco          String?
+  cidade            String?
+  estado            String?
+  cep               String?
+  criadoEm          DateTime  @default(now()) @map("criado_em")
+  atualizadoEm      DateTime  @updatedAt @map("atualizado_em")
+
+  pedidos           Pedido[]
+  precosCustomizados PrecoCustomizado[]
+  fornecedores      ClienteFornecedor[]
+
+  @@map("clientes")
+}
+
+model ClienteFornecedor {
+  id              String      @id @default(cuid())
+  clienteId       String      @map("cliente_id")
+  cliente         Cliente     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  fornecedorId    String      @map("fornecedor_id")
+  fornecedor      Fornecedor  @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+  listaPrecoId    String?     @map("lista_preco_id")
+  listaPreco      ListaPreco? @relation(fields: [listaPrecoId], references: [id])
+  criadoEm        DateTime    @default(now()) @map("criado_em")
+
+  @@unique([clienteId, fornecedorId])
+  @@map("clientes_fornecedores")
+}
+
+model Categoria {
+  id              String      @id @default(cuid())
+  nome            String
+  slug            String      @unique
+  descricao       String?
+  imagem          String?
+  categoriaPaiId  String?     @map("categoria_pai_id")
+  categoriaPai    Categoria?  @relation("CategoriaFilhos", fields: [categoriaPaiId], references: [id])
+  subcategorias   Categoria[] @relation("CategoriaFilhos")
+  produtos        Produto[]
+  criadoEm        DateTime    @default(now()) @map("criado_em")
+  atualizadoEm    DateTime    @updatedAt @map("atualizado_em")
+
+  @@map("categorias")
+}
+
+model Produto {
+  id                  String    @id @default(cuid())
+  fornecedorId        String    @map("fornecedor_id")
+  fornecedor          Fornecedor @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+  categoriaId         String?   @map("categoria_id")
+  categoria           Categoria? @relation(fields: [categoriaId], references: [id])
+  nome                String
+  slug                String
+  sku                 String
+  descricao           String?
+  precoBase           Decimal   @map("preco_base") @db.Decimal(10, 2)
+  imagens             String[]
+  ativo               Boolean   @default(true)
+  quantidadeEstoque   Int       @default(0) @map("quantidade_estoque")
+  estoqueMinimo       Int       @default(0) @map("estoque_minimo")
+  estoqueMaximo       Int       @default(1000) @map("estoque_maximo")
+  peso                Decimal?  @db.Decimal(10, 3)
+  unidadeMedida       String?   @map("unidade_medida")
+  criadoEm            DateTime  @default(now()) @map("criado_em")
+  atualizadoEm        DateTime  @updatedAt @map("atualizado_em")
+
+  itensPedido         ItemPedido[]
+  precosCustomizados  PrecoCustomizado[]
+  itensListaPreco     ItemListaPreco[]
+  movimentacoesEstoque MovimentacaoEstoque[]
+
+  @@unique([fornecedorId, sku])
+  @@unique([fornecedorId, slug])
+  @@map("produtos")
+}
+
+model ListaPreco {
+  id              String        @id @default(cuid())
+  fornecedorId    String        @map("fornecedor_id")
+  fornecedor      Fornecedor    @relation(fields: [fornecedorId], references: [id], onDelete: Cascade)
+  nome            String
+  descricao       String?
+  tipoDesconto    TipoDesconto  @default(percentual) @map("tipo_desconto")
+  valorDesconto   Decimal       @map("valor_desconto") @db.Decimal(10, 2)
+  ativo           Boolean       @default(true)
+  criadoEm        DateTime      @default(now()) @map("criado_em")
+  atualizadoEm    DateTime      @updatedAt @map("atualizado_em")
+
+  itens           ItemListaPreco[]
+  clientes        ClienteFornecedor[]
+
+  @@map("listas_preco")
+}
+
+model ItemListaPreco {
+  id              String      @id @default(cuid())
+  listaPrecoId    String      @map("lista_preco_id")
+  listaPreco      ListaPreco  @relation(fields: [listaPrecoId], references: [id], onDelete: Cascade)
+  produtoId       String      @map("produto_id")
+  produto         Produto     @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  precoEspecial   Decimal?    @map("preco_especial") @db.Decimal(10, 2)
+
+  @@unique([listaPrecoId, produtoId])
+  @@map("itens_lista_preco")
+}
+
+model PrecoCustomizado {
+  id              String    @id @default(cuid())
+  clienteId       String    @map("cliente_id")
+  cliente         Cliente   @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  produtoId       String    @map("produto_id")
+  produto         Produto   @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  preco           Decimal   @db.Decimal(10, 2)
+  criadoEm        DateTime  @default(now()) @map("criado_em")
+  atualizadoEm    DateTime  @updatedAt @map("atualizado_em")
+
+  @@unique([clienteId, produtoId])
+  @@map("precos_customizados")
+}
+
+model Pedido {
+  id                    String        @id @default(cuid())
+  numeroPedido          String        @unique @map("numero_pedido")
+  clienteId             String        @map("cliente_id")
+  cliente               Cliente       @relation(fields: [clienteId], references: [id])
+  fornecedorId          String        @map("fornecedor_id")
+  fornecedor            Fornecedor    @relation(fields: [fornecedorId], references: [id])
+  status                StatusPedido  @default(pendente)
+  subtotal              Decimal       @db.Decimal(10, 2)
+  desconto              Decimal       @default(0) @db.Decimal(10, 2)
+  frete                 Decimal       @default(0) @db.Decimal(10, 2)
+  total                 Decimal       @db.Decimal(10, 2)
+  observacoes           String?
+  enderecoEntrega       String?       @map("endereco_entrega")
+  cidadeEntrega         String?       @map("cidade_entrega")
+  estadoEntrega         String?       @map("estado_entrega")
+  cepEntrega            String?       @map("cep_entrega")
+  codigoRastreio        String?       @map("codigo_rastreio")
+  previsaoEntrega       DateTime?     @map("previsao_entrega")
+  dataEntrega           DateTime?     @map("data_entrega")
+  criadoEm              DateTime      @default(now()) @map("criado_em")
+  atualizadoEm          DateTime      @updatedAt @map("atualizado_em")
+
+  itens                 ItemPedido[]
+  historicoStatus       HistoricoStatusPedido[]
+
+  @@map("pedidos")
+}
+
+model ItemPedido {
+  id              String    @id @default(cuid())
+  pedidoId        String    @map("pedido_id")
+  pedido          Pedido    @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  produtoId       String    @map("produto_id")
+  produto         Produto   @relation(fields: [produtoId], references: [id])
+  quantidade      Int
+  precoUnitario   Decimal   @map("preco_unitario") @db.Decimal(10, 2)
+  precoTotal      Decimal   @map("preco_total") @db.Decimal(10, 2)
+
+  @@unique([pedidoId, produtoId])
+  @@map("itens_pedido")
+}
+
+model HistoricoStatusPedido {
+  id              String        @id @default(cuid())
+  pedidoId        String        @map("pedido_id")
+  pedido          Pedido        @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  status          StatusPedido
+  observacao      String?
+  criadoEm        DateTime      @default(now()) @map("criado_em")
+  criadoPor       String?       @map("criado_por")
+
+  @@map("historico_status_pedidos")
+}
+
+model MovimentacaoEstoque {
+  id                String           @id @default(cuid())
+  produtoId         String           @map("produto_id")
+  produto           Produto          @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  tipo              TipoMovimentacao
+  quantidade        Int
+  estoqueAnterior   Int              @map("estoque_anterior")
+  estoqueAtual      Int              @map("estoque_atual")
+  motivo            String
+  referencia        String?
+  criadoEm          DateTime         @default(now()) @map("criado_em")
+  criadoPor         String?          @map("criado_por")
+
+  @@map("movimentacoes_estoque")
+}
+
+model Notificacao {
+  id              String    @id @default(cuid())
+  usuarioId       String    @map("usuario_id")
+  usuario         Usuario   @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  titulo          String
+  mensagem        String
+  tipo            String
+  lida            Boolean   @default(false)
+  dados           Json?
+  criadoEm        DateTime  @default(now()) @map("criado_em")
+
+  @@map("notificacoes")
+}
+
+model EmailLog {
+  id              String      @id @default(cuid())
+  to              String
+  from            String
+  subject         String
+  template        String
+  status          EmailStatus @default(pending)
+  htmlContent     String?     @map("html_content") @db.Text
+  textContent     String?     @map("text_content") @db.Text
+  templateData    Json?       @map("template_data")
+  externalId      String?     @unique @map("external_id")
+  errorMessage    String?     @map("error_message") @db.Text
+  attempts        Int         @default(0)
+  lastAttemptAt   DateTime?   @map("last_attempt_at")
+  sentAt          DateTime?   @map("sent_at")
+  deliveredAt     DateTime?   @map("delivered_at")
+  openedAt        DateTime?   @map("opened_at")
+  metadata        Json?
+  tags            String[]
+  criadoEm        DateTime    @default(now()) @map("criado_em")
+  atualizadoEm    DateTime    @updatedAt @map("atualizado_em")
+
+  @@index([to])
+  @@index([status])
+  @@index([template])
+  @@index([criadoEm])
+  @@map("email_logs")
+}
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  userId        String?   @map("usuario_id")
+  user          Usuario?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action        String
+  resource      String
+  resourceId    String?   @map("resource_id")
+  ip            String?
+  userAgent     String?   @map("user_agent") @db.Text
+  description   String?   @db.Text
+  metadata      Json      @default("{}")
+  severity      String    @default("INFO")
+  timestamp     DateTime  @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([resourceId])
+  @@index([timestamp])
+  @@index([severity])
+  @@index([ip])
+  @@map("audit_logs")
+}
