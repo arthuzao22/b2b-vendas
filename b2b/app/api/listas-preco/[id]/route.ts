@@ -58,9 +58,15 @@ export async function GET(
             },
           },
         },
-        _count: {
-          select: {
-            clientes: true,
+        clientes: {
+          include: {
+            cliente: {
+              select: {
+                id: true,
+                razaoSocial: true,
+                nomeFantasia: true,
+              },
+            },
           },
         },
       },
@@ -71,24 +77,30 @@ export async function GET(
     }
 
     const response = {
-      id: listaPreco.id,
+      lista: {
+        id: listaPreco.id,
+        nome: listaPreco.nome,
+        descricao: listaPreco.descricao,
+        tipoDesconto: listaPreco.tipoDesconto,
+        valorDesconto: listaPreco.valorDesconto.toString(),
+        ativo: listaPreco.ativo,
+        criadoEm: listaPreco.criadoEm,
+        atualizadoEm: listaPreco.atualizadoEm,
+      },
       fornecedor: listaPreco.fornecedor,
-      nome: listaPreco.nome,
-      descricao: listaPreco.descricao,
-      tipoDesconto: listaPreco.tipoDesconto,
-      valorDesconto: listaPreco.valorDesconto.toString(),
-      ativo: listaPreco.ativo,
-      totalClientes: listaPreco._count.clientes,
-      produtos: listaPreco.itens.map((item) => ({
+      itens: listaPreco.itens.map((item) => ({
         id: item.id,
+        produtoId: item.produtoId,
+        precoEspecial: item.precoEspecial?.toString() || null,
         produto: {
           ...item.produto,
           precoBase: item.produto.precoBase.toString(),
         },
-        precoEspecial: item.precoEspecial?.toString() || null,
       })),
-      criadoEm: listaPreco.criadoEm,
-      atualizadoEm: listaPreco.atualizadoEm,
+      clientes: listaPreco.clientes.map((c) => ({
+        id: c.id,
+        cliente: c.cliente,
+      })),
     };
 
     return successResponse(response);

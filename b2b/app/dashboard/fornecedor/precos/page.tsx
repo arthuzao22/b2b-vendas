@@ -7,24 +7,21 @@ import { DataTable, Column } from "@/components/ui/data-table";
 import { Dialog } from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { PriceDisplay } from "@/components/ui/price-display";
-import { Plus, Edit, Trash2, DollarSign, Users } from "lucide-react";
+import { Plus, Edit, Trash2, DollarSign, Users, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDate } from "@/lib/utils";
+import Link from "next/link";
 
 interface ListaPreco {
   id: string;
   nome: string;
-  descricao?: string;
-  ativa: boolean;
-  dataInicio: Date;
-  dataFim?: Date | null;
-  descontoPercentual: number;
-  _count?: {
-    precos: number;
-    clientes: number;
-  };
-  criadoEm: Date;
+  descricao?: string | null;
+  tipoDesconto: "percentual" | "fixo";
+  valorDesconto: string;
+  ativo: boolean;
+  totalProdutos?: number;
+  totalClientes?: number;
+  criadoEm: string;
 }
 
 export default function PrecosPage() {
@@ -36,10 +33,9 @@ export default function PrecosPage() {
   const [formData, setFormData] = useState({
     nome: "",
     descricao: "",
-    dataInicio: "",
-    dataFim: "",
-    descontoPercentual: "",
-    ativa: true,
+    tipoDesconto: "percentual" as "percentual" | "fixo",
+    valorDesconto: "",
+    ativo: true,
   });
 
   useEffect(() => {
@@ -52,7 +48,9 @@ export default function PrecosPage() {
       const response = await fetch("/api/listas-preco");
       if (response.ok) {
         const data = await response.json();
-        setListas(Array.isArray(data.data) ? data.data : []);
+        // API retorna { success: true, data: { listas: [...], pagination: {...} } }
+        const listasData = data.data?.listas || data.data || [];
+        setListas(Array.isArray(listasData) ? listasData : []);
       }
     } catch (error) {
       console.error("Error fetching listas:", error);
@@ -69,19 +67,25 @@ export default function PrecosPage() {
       const url = editingLista
         ? `/api/listas-preco/${editingLista.id}`
         : "/api/listas-preco";
-      
+
       const response = await fetch(url, {
         method: editingLista ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          descontoPercentual: parseFloat(formData.descontoPercentual || "0"),
+          nome: formData.nome,
+          descricao: formData.descricao || undefined,
+          tipoDesconto: formData.tipoDesconto,
+          valorDesconto: parseFloat(formData.valorDesconto || "0"),
+          ativo: formData.ativo,
         }),
       });
 
       if (response.ok) {
         await fetchListas();
         handleCloseDialog();
+      } else {
+        const error = await response.json();
+        alert(error.error || "Erro ao salvar lista");
       }
     } catch (error) {
       console.error("Error saving lista:", error);
@@ -109,10 +113,9 @@ export default function PrecosPage() {
     setFormData({
       nome: lista.nome,
       descricao: lista.descricao || "",
-      dataInicio: new Date(lista.dataInicio).toISOString().split("T")[0],
-      dataFim: lista.dataFim ? new Date(lista.dataFim).toISOString().split("T")[0] : "",
-      descontoPercentual: lista.descontoPercentual.toString(),
-      ativa: lista.ativa,
+      tipoDesconto: lista.tipoDesconto,
+      valorDesconto: lista.valorDesconto,
+      ativo: lista.ativo,
     });
     setIsDialogOpen(true);
   };
@@ -123,11 +126,18 @@ export default function PrecosPage() {
     setFormData({
       nome: "",
       descricao: "",
-      dataInicio: "",
-      dataFim: "",
-      descontoPercentual: "",
-      ativa: true,
+      tipoDesconto: "percentual",
+      valorDesconto: "",
+      ativo: true,
     });
+  };
+
+  const formatDesconto = (lista: ListaPreco) => {
+    const valor = parseFloat(lista.valorDesconto);
+    if (lista.tipoDesconto === "percentual") {
+      return `${valor}%`;
+    }
+    return `R$ ${valor.toFixed(2)}`;
   };
 
   const columns: Column<ListaPreco>[] = [
@@ -145,65 +155,74 @@ export default function PrecosPage() {
       ),
     },
     {
-      key: "descontoPercentual",
+      key: "tipoDesconto",
       label: "Desconto",
       render: (lista) => (
-        <span className="font-medium text-green-600">
-          {lista.descontoPercentual}%
-        </span>
-      ),
-    },
-    {
-      key: "dataInicio",
-      label: "Vigência",
-      render: (lista) => (
-        <div className="text-sm">
-          <p>Início: {formatDate(lista.dataInicio)}</p>
-          {lista.dataFim && <p>Fim: {formatDate(lista.dataFim)}</p>}
+        <div>
+          <span className="font-medium text-green-600">
+            {formatDesconto(lista)}
+          </span>
+          <p className="text-xs text-muted-foreground capitalize">
+            {lista.tipoDesconto}
+          </p>
         </div>
       ),
     },
     {
-      key: "_count",
-      label: "Preços/Clientes",
+      key: "totais",
+      label: "Produtos/Clientes",
       render: (lista) => (
         <div className="flex items-center gap-3 text-sm">
           <span className="flex items-center gap-1">
             <DollarSign className="h-3 w-3" />
-            {lista._count?.precos || 0}
+            {lista.totalProdutos || 0}
           </span>
           <span className="flex items-center gap-1">
             <Users className="h-3 w-3" />
-            {lista._count?.clientes || 0}
+            {lista.totalClientes || 0}
           </span>
         </div>
       ),
     },
     {
-      key: "ativa",
+      key: "ativo",
       label: "Status",
       render: (lista) => (
         <span
-          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-            lista.ativa
+          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${lista.ativo
               ? "bg-green-100 text-green-800"
               : "bg-gray-100 text-gray-800"
-          }`}
+            }`}
         >
-          {lista.ativa ? "Ativa" : "Inativa"}
+          {lista.ativo ? "Ativa" : "Inativa"}
+        </span>
+      ),
+    },
+    {
+      key: "criadoEm",
+      label: "Criada em",
+      render: (lista) => (
+        <span className="text-sm text-muted-foreground">
+          {formatDate(lista.criadoEm)}
         </span>
       ),
     },
     {
       key: "actions",
       label: "Ações",
-      width: "120px",
+      width: "150px",
       render: (lista) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <Link href={`/dashboard/fornecedor/precos/${lista.id}`}>
+            <Button variant="ghost" size="sm" title="Gerenciar produtos">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </Link>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(lista)}
+            title="Editar"
           >
             <Edit className="h-4 w-4" />
           </Button>
@@ -212,6 +231,7 @@ export default function PrecosPage() {
             size="sm"
             onClick={() => handleDelete(lista.id)}
             className="text-red-600 hover:text-red-700"
+            title="Excluir"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -261,7 +281,7 @@ export default function PrecosPage() {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <div className="p-6">
+        <div className="p-6 max-w-md">
           <h2 className="text-xl font-bold mb-4">
             {editingLista ? "Editar Lista de Preço" : "Nova Lista de Preço"}
           </h2>
@@ -276,7 +296,7 @@ export default function PrecosPage() {
 
             <div className="space-y-2">
               <label htmlFor="descricao" className="text-sm font-medium">
-                Descrição
+                Descrição (opcional)
               </label>
               <textarea
                 id="descricao"
@@ -289,59 +309,53 @@ export default function PrecosPage() {
               />
             </div>
 
+            <div className="space-y-2">
+              <label htmlFor="tipoDesconto" className="text-sm font-medium">
+                Tipo de Desconto
+              </label>
+              <select
+                id="tipoDesconto"
+                value={formData.tipoDesconto}
+                onChange={(e) =>
+                  setFormData({ ...formData, tipoDesconto: e.target.value as any })
+                }
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="percentual">Percentual (%)</option>
+                <option value="fixo">Valor Fixo (R$)</option>
+              </select>
+            </div>
+
             <FormField
-              label="Desconto Percentual"
-              id="descontoPercentual"
+              label={formData.tipoDesconto === "percentual" ? "Desconto (%)" : "Desconto (R$)"}
+              id="valorDesconto"
               type="number"
               min="0"
-              max="100"
+              max={formData.tipoDesconto === "percentual" ? "100" : undefined}
               step="0.01"
-              value={formData.descontoPercentual}
+              value={formData.valorDesconto}
               onChange={(e) =>
-                setFormData({ ...formData, descontoPercentual: e.target.value })
+                setFormData({ ...formData, valorDesconto: e.target.value })
               }
               required
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                label="Data Início"
-                id="dataInicio"
-                type="date"
-                value={formData.dataInicio}
-                onChange={(e) =>
-                  setFormData({ ...formData, dataInicio: e.target.value })
-                }
-                required
-              />
-
-              <FormField
-                label="Data Fim (opcional)"
-                id="dataFim"
-                type="date"
-                value={formData.dataFim}
-                onChange={(e) =>
-                  setFormData({ ...formData, dataFim: e.target.value })
-                }
-              />
-            </div>
-
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
-                id="ativa"
-                checked={formData.ativa}
+                id="ativo"
+                checked={formData.ativo}
                 onChange={(e) =>
-                  setFormData({ ...formData, ativa: e.target.checked })
+                  setFormData({ ...formData, ativo: e.target.checked })
                 }
                 className="h-4 w-4"
               />
-              <label htmlFor="ativa" className="text-sm font-medium">
+              <label htmlFor="ativo" className="text-sm font-medium">
                 Lista ativa
               </label>
             </div>
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
                 Cancelar
               </Button>

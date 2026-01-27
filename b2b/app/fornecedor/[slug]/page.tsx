@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PriceDisplay } from "@/components/ui/price-display";
 import { Building2, MapPin, CheckCircle2, Package, Mail, Phone } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export const dynamic = 'force-dynamic';
 
@@ -155,46 +156,48 @@ export default async function FornecedorPage({
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {fornecedor.produtos.map((produto) => (
-            <Card key={produto.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="relative h-48 w-full bg-gray-100">
-                {produto.imagens[0] ? (
-                  <Image
-                    src={produto.imagens[0]}
-                    alt={produto.nome}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <Package className="h-12 w-12 text-gray-400" />
+            <Link key={produto.id} href={`/fornecedor/${fornecedor.slug}/produto/${produto.slug}`}>
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                <div className="relative h-48 w-full bg-gray-100">
+                  {produto.imagens[0] ? (
+                    <Image
+                      src={produto.imagens[0]}
+                      alt={produto.nome}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center">
+                      <Package className="h-12 w-12 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+
+                <CardContent className="p-4 space-y-3">
+                  <div>
+                    <h3 className="font-semibold line-clamp-2 mb-1">
+                      {produto.nome}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">SKU: {produto.sku}</p>
                   </div>
-                )}
-              </div>
 
-              <CardContent className="p-4 space-y-3">
-                <div>
-                  <h3 className="font-semibold line-clamp-2 mb-1">
-                    {produto.nome}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">SKU: {produto.sku}</p>
-                </div>
+                  {produto.descricao && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {produto.descricao}
+                    </p>
+                  )}
 
-                {produto.descricao && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {produto.descricao}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <PriceDisplay value={Number(produto.precoBase)} size="md" />
-                  <p className="text-xs text-muted-foreground">
-                    {produto.quantidadeEstoque > 0
-                      ? `${produto.quantidadeEstoque} disponíveis`
-                      : "Sem estoque"}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex items-center justify-between pt-2 border-t">
+                    <PriceDisplay value={Number(produto.precoBase)} size="md" />
+                    <p className="text-xs text-muted-foreground">
+                      {produto.quantidadeEstoque > 0
+                        ? `${produto.quantidadeEstoque} disponíveis`
+                        : "Sem estoque"}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       )}
