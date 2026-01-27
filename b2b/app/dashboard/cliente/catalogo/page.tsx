@@ -42,7 +42,11 @@ export default function CatalogoClientePage() {
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setProdutos(data.data);
+          // API pode retornar array direto ou objeto com produtos
+          const produtosData = Array.isArray(data.data) 
+            ? data.data 
+            : data.data?.produtos || [];
+          setProdutos(produtosData);
         }
       }
     } catch (error) {

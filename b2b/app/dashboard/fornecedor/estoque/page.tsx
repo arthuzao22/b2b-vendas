@@ -2,22 +2,6 @@ import { requireFornecedor } from "@/lib/api-helpers";
 import { prisma } from "@/lib/prisma";
 import { EstoqueClient } from "./estoque-client";
 
-interface MovimentacaoEstoque {
-  id: string;
-  tipo: string;
-  quantidade: number;
-  estoqueAnterior: number;
-  estoqueAtual: number;
-  motivo: string;
-  referencia?: string | null;
-  criadoEm: Date;
-  produto: {
-    id: string;
-    nome: string;
-    sku: string;
-  };
-}
-
 async function getMovimentacoes(fornecedorId: string) {
   return await prisma.movimentacaoEstoque.findMany({
     where: {
@@ -41,9 +25,34 @@ async function getMovimentacoes(fornecedorId: string) {
   });
 }
 
+async function getProdutos(fornecedorId: string) {
+  return await prisma.produto.findMany({
+    where: {
+      fornecedorId,
+      ativo: true,
+    },
+    select: {
+      id: true,
+      nome: true,
+      sku: true,
+      quantidadeEstoque: true,
+      estoqueMinimo: true,
+      estoqueMaximo: true,
+    },
+    orderBy: {
+      nome: "asc",
+    },
+  });
+}
+
 export default async function EstoquePage() {
   const { fornecedorId } = await requireFornecedor();
-  const movimentacoes = await getMovimentacoes(fornecedorId);
 
-  return <EstoqueClient movimentacoes={movimentacoes} />;
+  const [movimentacoes, produtos] = await Promise.all([
+    getMovimentacoes(fornecedorId),
+    getProdutos(fornecedorId),
+  ]);
+
+  return <EstoqueClient movimentacoes={movimentacoes} produtos={produtos} />;
 }
+

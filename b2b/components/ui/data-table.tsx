@@ -66,18 +66,18 @@ export function DataTable<T extends Record<string, any>>({
 
   const sortedData = sortKey
     ? [...safeData].sort((a, b) => {
-        const aValue = a[sortKey];
-        const bValue = b[sortKey];
-        const order = sortOrder === 'asc' ? 1 : -1;
+      const aValue = a[sortKey];
+      const bValue = b[sortKey];
+      const order = sortOrder === 'asc' ? 1 : -1;
 
-        if (typeof aValue === 'string' && typeof bValue === 'string') {
-          return aValue.localeCompare(bValue) * order;
-        }
-        if (typeof aValue === 'number' && typeof bValue === 'number') {
-          return (aValue - bValue) * order;
-        }
-        return 0;
-      })
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return aValue.localeCompare(bValue) * order;
+      }
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return (aValue - bValue) * order;
+      }
+      return 0;
+    })
     : safeData;
 
   if (loading) {
@@ -121,7 +121,7 @@ export function DataTable<T extends Record<string, any>>({
         <div className="flex items-center gap-4">
           <Input
             placeholder={searchPlaceholder}
-            value={searchQuery}
+            value={searchQuery ?? ""}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="max-w-sm"
           />
