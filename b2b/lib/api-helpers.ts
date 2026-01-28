@@ -5,6 +5,7 @@ import { authOptions } from "./auth";
 import { TipoUsuario } from "@prisma/client";
 import { ZodError } from "zod";
 import { logger } from "./logger";
+import { ApiError } from "./api/error-handler";
 
 // Resposta de sucesso
 export function successResponse<T>(data: T, status = 200) {
@@ -46,7 +47,7 @@ export async function getUserSession() {
 export async function requireAuth() {
   const user = await getUserSession();
   if (!user) {
-    throw new Error("Não autenticado");
+    throw new ApiError("Não autenticado", 401);
   }
   return user;
 }
@@ -55,7 +56,7 @@ export async function requireAuth() {
 export async function requireRole(roles: TipoUsuario[]) {
   const user = await requireAuth();
   if (!roles.includes(user.tipo)) {
-    throw new Error("Sem permissão");
+    throw new ApiError("Sem permissão", 403);
   }
   return user;
 }
@@ -64,7 +65,7 @@ export async function requireRole(roles: TipoUsuario[]) {
 export async function requireFornecedor() {
   const user = await requireRole([TipoUsuario.fornecedor]);
   if (!user.fornecedorId) {
-    throw new Error("Fornecedor não encontrado");
+    throw new ApiError("Fornecedor não encontrado", 404);
   }
   return { user, fornecedorId: user.fornecedorId };
 }
@@ -73,7 +74,7 @@ export async function requireFornecedor() {
 export async function requireCliente() {
   const user = await requireRole([TipoUsuario.cliente]);
   if (!user.clienteId) {
-    throw new Error("Cliente não encontrado");
+    throw new ApiError("Cliente não encontrado", 404);
   }
   return { user, clienteId: user.clienteId };
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { TipoUsuario } from "@prisma/client";
+import { getRedirectByUserType } from "./lib/auth";
 
 // Rotas públicas que não requerem autenticação
 const publicRoutes = [
@@ -71,15 +72,6 @@ export async function middleware(request: NextRequest) {
   }
 
   return NextResponse.next();
-}
-
-function getRedirectByUserType(tipo: TipoUsuario): string {
-  const redirects: Record<TipoUsuario, string> = {
-    [TipoUsuario.admin]: "/dashboard/admin",
-    [TipoUsuario.fornecedor]: "/dashboard/fornecedor",
-    [TipoUsuario.cliente]: "/dashboard/cliente",
-  };
-  return redirects[tipo] || "/";
 }
 
 export const config = {

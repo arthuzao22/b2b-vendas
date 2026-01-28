@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/data-table";
 import { Dialog } from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import Link from "next/link";
 import {
   ArrowUp,
   ArrowDown,
@@ -17,7 +19,8 @@ import {
   AlertTriangle,
   TrendingUp,
   TrendingDown,
-  Boxes
+  Boxes,
+  Eye,
 } from "lucide-react";
 
 interface MovimentacaoEstoque {
@@ -50,11 +53,29 @@ interface EstoqueClientProps {
   produtos: Produto[];
 }
 
+interface DashboardData {
+  totalProdutos: number;
+  estoqueBaixo: number;
+  semEstoque: number;
+  valorTotal: string;
+}
+
+interface AlertaEstoque {
+  produtoId: string;
+  nome: string;
+  sku: string;
+  quantidadeEstoque: number;
+  estoqueMinimo: number;
+  tipo: "baixo" | "zerado" | "excesso";
+}
+
 export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }: EstoqueClientProps) {
   const [movimentacoes, setMovimentacoes] = useState<MovimentacaoEstoque[]>(initialMovimentacoes);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [alertas, setAlertas] = useState<AlertaEstoque[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"movimentacoes" | "produtos">("movimentacoes");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "movimentacoes" | "produtos">("dashboard");
   const [formData, setFormData] = useState({
     produtoId: "",
     tipo: "entrada" as "entrada" | "saida" | "ajuste",
@@ -63,6 +84,44 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
     referencia: "",
   });
   const [error, setError] = useState<string | null>(null);
+
+  // Load dashboard data and alerts
+  useEffect(() => {
+    loadDashboardData();
+    loadAlertas();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      const response = await fetch("/api/estoque/dashboard");
+      if (response.ok) {
+        const result = await response.json();
+        setDashboardData(result.data);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dashboard:", error);
+    }
+  };
+
+  const loadAlertas = async () => {
+    try {
+      const response = await fetch("/api/estoque/alertas");
+      if (response.ok) {
+        const result = await response.json();
+        setAlertas(result.data || []);
+      }
+    } catch (error) {
+      console.error("Erro ao carregar alertas:", error);
+    }
+  };
+
+  const formatCurrency = (value: string | number) => {
+    const numValue = typeof value === "string" ? parseFloat(value) : value;
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(numValue);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -363,6 +422,15 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
       {/* Tabs */}
       <div className="flex gap-2 border-b">
         <button
+          onClick={() => setActiveTab("dashboard")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "dashboard"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+        >
+          Dashboard
+        </button>
+        <button
           onClick={() => setActiveTab("movimentacoes")}
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "movimentacoes"
               ? "border-primary text-primary"
@@ -383,7 +451,116 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
       </div>
 
       {/* Content */}
-      {activeTab === "movimentacoes" ? (
+      {activeTab === "dashboard" ? (
+        <div className="space-y-6">
+          {/* Dashboard KPIs */}
+          {dashboardData && (
+            <div className="grid gap-4 md:grid-cols-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{dashboardData.totalProdutos}</div>
+                  <p className="text-xs text-muted-foreground">
+                    produtos cadastrados
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Estoque Baixo</CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-yellow-600">{dashboardData.estoqueBaixo}</div>
+                  <p className="text-xs text-muted-foreground">
+                    precisam reposição
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Sem Estoque</CardTitle>
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-600">{dashboardData.semEstoque}</div>
+                  <p className="text-xs text-muted-foreground">
+                    esgotados
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{formatCurrency(dashboardData.valorTotal)}</div>
+                  <p className="text-xs text-muted-foreground">
+                    estoque valorizado
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Stock Alerts */}
+          {alertas.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Alertas de Estoque</CardTitle>
+                <CardDescription>Produtos que precisam de atenção</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {alertas.map((alerta) => (
+                    <div
+                      key={alerta.produtoId}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                    >
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{alerta.nome}</p>
+                          <Badge
+                            className={
+                              alerta.tipo === "zerado"
+                                ? "bg-red-100 text-red-800"
+                                : alerta.tipo === "baixo"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-blue-100 text-blue-800"
+                            }
+                          >
+                            {alerta.tipo === "zerado"
+                              ? "Esgotado"
+                              : alerta.tipo === "baixo"
+                              ? "Estoque Baixo"
+                              : "Excesso"}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          SKU: {alerta.sku} | Estoque: {alerta.quantidadeEstoque} | Mínimo: {alerta.estoqueMinimo}
+                        </p>
+                      </div>
+                      <Link href={`/dashboard/fornecedor/produtos/${alerta.produtoId}/movimentacoes`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          Ver Histórico
+                        </Button>
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      ) : activeTab === "movimentacoes" ? (
         <Card>
           <CardHeader>
             <CardTitle>Histórico de Movimentações</CardTitle>
