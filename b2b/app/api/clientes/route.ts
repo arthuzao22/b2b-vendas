@@ -5,6 +5,7 @@ import { successResponse, errorResponse, handleZodError, requireFornecedor } fro
 import { logger } from "@/lib/logger";
 import { TipoUsuario } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { isValidCNPJ } from "@/lib/validators";
 
 const createClienteSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -13,7 +14,9 @@ const createClienteSchema = z.object({
   telefone: z.string().optional(),
   razaoSocial: z.string().min(3, "Razão social deve ter no mínimo 3 caracteres"),
   nomeFantasia: z.string().optional(),
-  cnpj: z.string().regex(/^\d{14}$/, "CNPJ deve conter 14 dígitos"),
+  cnpj: z.string()
+    .regex(/^\d{14}$/, "CNPJ deve conter 14 dígitos")
+    .refine(isValidCNPJ, "CNPJ inválido - dígitos verificadores incorretos"),
   inscricaoEstadual: z.string().optional(),
   endereco: z.string().optional(),
   cidade: z.string().optional(),

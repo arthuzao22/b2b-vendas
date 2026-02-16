@@ -6,8 +6,9 @@ import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { PriceDisplay } from "@/components/ui/price-display";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Truck } from "lucide-react";
+import { ArrowLeft, Truck, MapPin } from "lucide-react";
 import Link from "next/link";
+import { CancelOrderButton } from "@/components/orders/cancel-order-button";
 
 async function getPedido(id: string, clienteId: string) {
   const pedido = await prisma.pedido.findFirst({
@@ -85,7 +86,16 @@ export default async function PedidoDetailPage({
             Pedido realizado em {formatDate(pedido.criadoEm)}
           </p>
         </div>
-        <StatusBadge status={pedido.status} />
+        <div className="flex items-center gap-3">
+          <StatusBadge status={pedido.status} />
+          <CancelOrderButton pedidoId={pedido.id} status={pedido.status} />
+          <Link href={`/pedidos/${pedido.id}/rastreio`}>
+            <Button variant="outline" size="sm">
+              <MapPin className="mr-2 h-4 w-4" />
+              Rastrear
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -249,12 +259,12 @@ export default async function PedidoDetailPage({
                   {pedido.enderecoEntrega || pedido.cliente.endereco}
                 </p>
               )}
-              {(pedido.cidadeEntrega || pedido.cliente.cidade) && 
-               (pedido.estadoEntrega || pedido.cliente.estado) && (
-                <p className="text-sm text-muted-foreground">
-                  {pedido.cidadeEntrega || pedido.cliente.cidade} - {pedido.estadoEntrega || pedido.cliente.estado}
-                </p>
-              )}
+              {(pedido.cidadeEntrega || pedido.cliente.cidade) &&
+                (pedido.estadoEntrega || pedido.cliente.estado) && (
+                  <p className="text-sm text-muted-foreground">
+                    {pedido.cidadeEntrega || pedido.cliente.cidade} - {pedido.estadoEntrega || pedido.cliente.estado}
+                  </p>
+                )}
               {(pedido.cepEntrega || pedido.cliente.cep) && (
                 <p className="text-sm text-muted-foreground">
                   CEP: {pedido.cepEntrega || pedido.cliente.cep}

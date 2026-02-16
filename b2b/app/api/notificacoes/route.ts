@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { successResponse, errorResponse, handleZodError, requireAuth } from "@/lib/api-helpers";
+import { successResponse, errorResponse, handleZodError, requireAuth, requireRole } from "@/lib/api-helpers";
 import { logger } from "@/lib/logger";
+import { TipoUsuario } from "@prisma/client";
 
 const createNotificacaoSchema = z.object({
   usuarioId: z.string().min(1, "Usuário é obrigatório"),
@@ -12,10 +13,10 @@ const createNotificacaoSchema = z.object({
   dados: z.any().optional(),
 });
 
-// POST /api/notificacoes - Criar notificação (system use)
+// POST /api/notificacoes - Criar notificação (admin/fornecedor only)
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth();
+    await requireRole([TipoUsuario.admin, TipoUsuario.fornecedor]);
 
     const body = await request.json();
     const validatedData = createNotificacaoSchema.parse(body);
@@ -27,11 +28,14 @@ export async function POST(request: NextRequest) {
     logger.info("Notificação criada", { notificacaoId: notificacao.id, usuarioId: notificacao.usuarioId });
 
     return successResponse(notificacao, 201);
-  } catch (error: any) {
-    if (error.name === "ZodError") {
+  } catch (error) {
+    if (error instanceof z.ZodError) {
       return handleZodError(error);
     }
-    return errorResponse(error.message || "Erro ao criar notificação", 500);
+    if (error instanceof Error) {
+      return errorResponse(error.message, error.message.includes("permissão") ? 403 : 500);
+    }
+    return errorResponse("Erro ao criar notificação", 500);
   }
 }
 

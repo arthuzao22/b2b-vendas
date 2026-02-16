@@ -19,6 +19,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
+import { NotificationDropdown } from "@/components/ui/notification-dropdown"
 
 interface NavItem {
   title: string
@@ -90,10 +91,13 @@ export function DashboardSidebar({ userType, userName, userRole }: DashboardSide
         <div className="flex flex-col h-full">
           {/* Logo/Header */}
           <div className="p-6 border-b">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary rounded-md" />
-              <span className="text-xl font-bold">B2B Vendas</span>
-            </Link>
+            <div className="flex items-center justify-between">
+              <Link href="/" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-primary rounded-md" />
+                <span className="text-xl font-bold">B2B Vendas</span>
+              </Link>
+              <NotificationDropdown />
+            </div>
           </div>
 
           {/* User Info */}
@@ -116,7 +120,7 @@ export function DashboardSidebar({ userType, userName, userRole }: DashboardSide
             {items.map((item) => {
               const Icon = item.icon
               const isActive = pathname === item.href
-              
+
               return (
                 <Link
                   key={item.href}

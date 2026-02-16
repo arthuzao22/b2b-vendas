@@ -9,7 +9,9 @@ import { TipoUsuario } from "@prisma/client";
 import { slugify } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 
-// Validate CNPJ format (14 digits)
+import { isValidCNPJ } from "@/lib/validators";
+
+// Validate CNPJ format (14 digits) + dígitos verificadores
 const cnpjRegex = /^\d{14}$/;
 
 const registerSchema = z.object({
@@ -18,13 +20,16 @@ const registerSchema = z.object({
   nome: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
   telefone: z.string().optional(),
   tipo: z.enum(["fornecedor", "cliente", "admin"]),
-  
+
   // Campos específicos para fornecedor e cliente
   razaoSocial: z.string().min(3, "Razão social deve ter no mínimo 3 caracteres").optional(),
   nomeFantasia: z.string().optional(),
-  cnpj: z.string().regex(cnpjRegex, "CNPJ deve conter 14 dígitos").optional(),
+  cnpj: z.string()
+    .regex(cnpjRegex, "CNPJ deve conter 14 dígitos")
+    .refine(isValidCNPJ, "CNPJ inválido - dígitos verificadores incorretos")
+    .optional(),
   descricao: z.string().optional(),
-  
+
   // Campos específicos para cliente
   inscricaoEstadual: z.string().optional(),
   endereco: z.string().optional(),

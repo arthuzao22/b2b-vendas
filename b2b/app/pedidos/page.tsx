@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ShoppingBag, Package } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { OrderSearch } from "@/components/orders/order-search";
 
 async function getPedidos(clienteId: string) {
   return await prisma.pedido.findMany({
@@ -41,6 +42,7 @@ export default async function PedidosPage() {
             Acompanhe todos os seus pedidos
           </p>
         </div>
+        <OrderSearch className="max-w-md" />
         <EmptyState
           icon={ShoppingBag}
           title="Você ainda não fez nenhum pedido"
@@ -60,11 +62,14 @@ export default async function PedidosPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Meus Pedidos</h1>
-        <p className="text-muted-foreground">
-          {pedidos.length} {pedidos.length === 1 ? "pedido encontrado" : "pedidos encontrados"}
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Meus Pedidos</h1>
+          <p className="text-muted-foreground">
+            {pedidos.length} {pedidos.length === 1 ? "pedido encontrado" : "pedidos encontrados"}
+          </p>
+        </div>
+        <OrderSearch className="max-w-sm" />
       </div>
 
       <div className="space-y-4">
