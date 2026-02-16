@@ -53,12 +53,12 @@ export default function PrecosCustomizadosPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   // Form state
   const [selectedClienteId, setSelectedClienteId] = useState("");
   const [selectedProdutoId, setSelectedProdutoId] = useState("");
   const [preco, setPreco] = useState("");
-  
+
   // Search filters
   const [searchCliente, setSearchCliente] = useState("");
   const [searchProduto, setSearchProduto] = useState("");
@@ -104,7 +104,7 @@ export default function PrecosCustomizadosPage() {
       const url = editingId
         ? `/api/precos-customizados/${editingId}`
         : "/api/precos-customizados";
-      
+
       const method = editingId ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -179,12 +179,12 @@ export default function PrecosCustomizadosPage() {
   const filteredPrecos = precos.filter((preco) => {
     const clienteMatch = searchCliente
       ? preco.cliente.razaoSocial.toLowerCase().includes(searchCliente.toLowerCase()) ||
-        preco.cliente.nomeFantasia?.toLowerCase().includes(searchCliente.toLowerCase())
+      preco.cliente.nomeFantasia?.toLowerCase().includes(searchCliente.toLowerCase())
       : true;
-    
+
     const produtoMatch = searchProduto
       ? preco.produto.nome.toLowerCase().includes(searchProduto.toLowerCase()) ||
-        preco.produto.sku.toLowerCase().includes(searchProduto.toLowerCase())
+      preco.produto.sku.toLowerCase().includes(searchProduto.toLowerCase())
       : true;
 
     return clienteMatch && produtoMatch;
@@ -195,7 +195,7 @@ export default function PrecosCustomizadosPage() {
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[hsl(var(--color-brand-500))] mx-auto"></div>
             <p className="mt-4 text-gray-600">Carregando...</p>
           </div>
         </div>

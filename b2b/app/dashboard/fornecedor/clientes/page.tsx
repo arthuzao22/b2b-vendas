@@ -70,7 +70,7 @@ export default function ClientesPage() {
         limit: perPage.toString(),
         ...(search && { search }),
       })
-      
+
       const response = await fetch(`/api/clientes?${params}`)
       const data = await response.json()
 
@@ -127,10 +127,10 @@ export default function ClientesPage() {
     setSaving(true)
 
     try {
-      const url = selectedCliente 
-        ? `/api/clientes/${selectedCliente.id}` 
+      const url = selectedCliente
+        ? `/api/clientes/${selectedCliente.id}`
         : `/api/clientes`
-      
+
       const response = await fetch(url, {
         method: selectedCliente ? "PUT" : "POST",
         headers: {
@@ -283,17 +283,17 @@ export default function ClientesPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             title="Ver detalhes"
                             onClick={() => handleViewCliente(cliente)}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             title="Editar"
                             onClick={() => handleEditCliente(cliente)}
                           >
@@ -337,7 +337,7 @@ export default function ClientesPage() {
 
       {/* View Client Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-2xl bg-white dark:bg-gray-900">
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Detalhes do Cliente</DialogTitle>
             <DialogDescription>
@@ -411,7 +411,7 @@ export default function ClientesPage() {
           setIsAddDialogOpen(false)
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-white dark:bg-gray-900">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {selectedCliente ? "Editar Cliente" : "Novo Cliente"}
@@ -535,9 +535,9 @@ export default function ClientesPage() {
             </div>
 
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => {
                   setIsEditDialogOpen(false)
                   setIsAddDialogOpen(false)

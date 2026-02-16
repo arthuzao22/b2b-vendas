@@ -1,8 +1,5 @@
-'use client';
-
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
 import { Button } from './button';
 
 interface ActionObject {
@@ -12,7 +9,8 @@ interface ActionObject {
 }
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  /** Accept a LucideIcon component or pre-rendered ReactNode */
+  icon?: React.ComponentType<{ className?: string; strokeWidth?: number }> | React.ReactNode;
   title: string;
   description?: string;
   action?: ActionObject | React.ReactNode;
@@ -28,13 +26,23 @@ function isActionObject(action: unknown): action is ActionObject {
   );
 }
 
+function isComponentType(icon: unknown): icon is React.ComponentType<{ className?: string; strokeWidth?: number }> {
+  return typeof icon === 'function';
+}
+
 export function EmptyState({
-  icon: Icon,
+  icon: IconProp,
   title,
   description,
   action,
   className,
 }: EmptyStateProps) {
+  const iconElement = IconProp
+    ? isComponentType(IconProp)
+      ? <IconProp className="size-16 text-[hsl(var(--color-neutral-300))]" strokeWidth={1.5} />
+      : IconProp
+    : null;
+
   return (
     <div
       className={cn(
@@ -42,13 +50,9 @@ export function EmptyState({
         className
       )}
     >
-      {Icon && (
-        <div className="mb-[var(--space-4)]">
-          <Icon
-            className="size-16 text-[hsl(var(--color-neutral-300))]"
-            strokeWidth={1.5}
-            aria-hidden="true"
-          />
+      {iconElement && (
+        <div className="mb-[var(--space-4)]" aria-hidden="true">
+          {iconElement}
         </div>
       )}
       <h3 className="text-[length:var(--text-md)] font-semibold text-[hsl(var(--color-neutral-700))] text-center">

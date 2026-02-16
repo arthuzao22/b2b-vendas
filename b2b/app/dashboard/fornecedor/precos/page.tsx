@@ -3,6 +3,9 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { DataTable, Column } from "@/components/ui/data-table";
 import {
   Dialog,
@@ -12,7 +15,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { FormField } from "@/components/ui/form-field";
+import { PageHeader } from "@/components/layout/page-header";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Plus, Edit, Trash2, DollarSign, Users, Settings } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -55,7 +58,6 @@ export default function PrecosPage() {
       const response = await fetch("/api/listas-preco");
       if (response.ok) {
         const data = await response.json();
-        // API retorna { success: true, data: { listas: [...], pagination: {...} } }
         const listasData = data.data?.listas || data.data || [];
         setListas(Array.isArray(listasData) ? listasData : []);
       }
@@ -154,9 +156,9 @@ export default function PrecosPage() {
       sortable: true,
       render: (lista) => (
         <div>
-          <p className="font-medium">{lista.nome}</p>
+          <p className="font-medium text-[hsl(var(--color-neutral-800))]">{lista.nome}</p>
           {lista.descricao && (
-            <p className="text-xs text-muted-foreground">{lista.descricao}</p>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))]">{lista.descricao}</p>
           )}
         </div>
       ),
@@ -166,10 +168,10 @@ export default function PrecosPage() {
       label: "Desconto",
       render: (lista) => (
         <div>
-          <span className="font-medium text-green-600">
+          <span className="font-medium text-[hsl(var(--color-success-600))]">
             {formatDesconto(lista)}
           </span>
-          <p className="text-xs text-muted-foreground capitalize">
+          <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] capitalize">
             {lista.tipoDesconto}
           </p>
         </div>
@@ -179,13 +181,13 @@ export default function PrecosPage() {
       key: "totais",
       label: "Produtos/Clientes",
       render: (lista) => (
-        <div className="flex items-center gap-3 text-sm">
-          <span className="flex items-center gap-1">
-            <DollarSign className="h-3 w-3" />
+        <div className="flex items-center gap-[var(--space-3)] text-[length:var(--text-sm)]">
+          <span className="flex items-center gap-[var(--space-1)] text-[hsl(var(--color-neutral-600))]">
+            <DollarSign className="size-3.5" />
             {lista.totalProdutos || 0}
           </span>
-          <span className="flex items-center gap-1">
-            <Users className="h-3 w-3" />
+          <span className="flex items-center gap-[var(--space-1)] text-[hsl(var(--color-neutral-600))]">
+            <Users className="size-3.5" />
             {lista.totalClientes || 0}
           </span>
         </div>
@@ -195,21 +197,16 @@ export default function PrecosPage() {
       key: "ativo",
       label: "Status",
       render: (lista) => (
-        <span
-          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${lista.ativo
-            ? "bg-green-100 text-green-800"
-            : "bg-gray-100 text-gray-800"
-            }`}
-        >
+        <Badge variant={lista.ativo ? "success" : "neutral"}>
           {lista.ativo ? "Ativa" : "Inativa"}
-        </span>
+        </Badge>
       ),
     },
     {
       key: "criadoEm",
       label: "Criada em",
       render: (lista) => (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
           {formatDate(lista.criadoEm)}
         </span>
       ),
@@ -219,28 +216,28 @@ export default function PrecosPage() {
       label: "Ações",
       width: "150px",
       render: (lista) => (
-        <div className="flex items-center gap-1">
-          <Link href={`/dashboard/fornecedor/precos/${lista.id}`}>
-            <Button variant="ghost" size="sm" title="Gerenciar produtos">
-              <Settings className="h-4 w-4" />
-            </Button>
-          </Link>
+        <div className="flex items-center gap-[var(--space-1)]">
+          <Button variant="ghost" size="sm" title="Gerenciar produtos" asChild>
+            <Link href={`/dashboard/fornecedor/precos/${lista.id}`}>
+              <Settings className="size-4" />
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleEdit(lista)}
             title="Editar"
           >
-            <Edit className="h-4 w-4" />
+            <Edit className="size-4" />
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => handleDelete(lista.id)}
-            className="text-red-600 hover:text-red-700"
+            className="text-[hsl(var(--color-error-500))] hover:text-[hsl(var(--color-error-700))] hover:bg-[hsl(var(--color-error-50))]"
             title="Excluir"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="size-4" />
           </Button>
         </div>
       ),
@@ -248,7 +245,7 @@ export default function PrecosPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-[var(--space-6)]">
       <div>
         <Breadcrumbs
           items={[
@@ -256,15 +253,17 @@ export default function PrecosPage() {
             { label: "Listas de Preço" },
           ]}
         />
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between mt-[var(--space-4)]">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Listas de Preço</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-[length:var(--text-2xl)] font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">
+              Listas de Preço
+            </h1>
+            <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-1)]">
               Gerencie as listas de preços e descontos para seus clientes
             </p>
           </div>
           <Button onClick={() => setIsDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 size-4" />
             Nova Lista
           </Button>
         </div>
@@ -287,8 +286,9 @@ export default function PrecosPage() {
         </CardContent>
       </Card>
 
+      {/* Modal — Design System Pattern */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md bg-white dark:bg-gray-900">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
               {editingLista ? "Editar Lista de Preço" : "Nova Lista de Preço"}
@@ -297,62 +297,67 @@ export default function PrecosPage() {
               {editingLista ? "Atualize as informações da lista de preço" : "Crie uma nova lista de preço para seus clientes"}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <FormField
-              label="Nome"
-              id="nome"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              required
-            />
+          <form onSubmit={handleSubmit} className="space-y-[var(--space-4)] p-[var(--space-6)] pt-[var(--space-4)]">
+            <div className="space-y-[var(--space-2)]">
+              <Label htmlFor="nome">Nome *</Label>
+              <Input
+                id="nome"
+                value={formData.nome}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                placeholder="Ex: Lista VIP"
+                required
+              />
+            </div>
 
-            <div className="space-y-2">
-              <label htmlFor="descricao" className="text-sm font-medium">
-                Descrição (opcional)
-              </label>
+            <div className="space-y-[var(--space-2)]">
+              <Label htmlFor="descricao">Descrição (opcional)</Label>
               <textarea
                 id="descricao"
                 value={formData.descricao}
                 onChange={(e) =>
                   setFormData({ ...formData, descricao: e.target.value })
                 }
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex min-h-[80px] w-full rounded-[var(--radius-md)] border border-[hsl(var(--color-neutral-200))] bg-[hsl(var(--color-neutral-0))] px-[var(--space-3)] py-[var(--space-2)] text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-700))] placeholder:text-[hsl(var(--color-neutral-400))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--color-brand-500))] focus-visible:ring-offset-2 transition-all duration-[var(--transition-fast)]"
                 rows={3}
+                placeholder="Descreva esta lista de preço..."
               />
             </div>
 
-            <div className="space-y-2">
-              <label htmlFor="tipoDesconto" className="text-sm font-medium">
-                Tipo de Desconto
-              </label>
+            <div className="space-y-[var(--space-2)]">
+              <Label htmlFor="tipoDesconto">Tipo de Desconto</Label>
               <select
                 id="tipoDesconto"
                 value={formData.tipoDesconto}
                 onChange={(e) =>
-                  setFormData({ ...formData, tipoDesconto: e.target.value as any })
+                  setFormData({ ...formData, tipoDesconto: e.target.value as "percentual" | "fixo" })
                 }
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="flex h-9 w-full rounded-[var(--radius-md)] border border-[hsl(var(--color-neutral-200))] bg-[hsl(var(--color-neutral-0))] px-[var(--space-3)] py-[var(--space-2)] text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-700))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--color-brand-500))] focus-visible:ring-offset-2 transition-all duration-[var(--transition-fast)]"
               >
                 <option value="percentual">Percentual (%)</option>
                 <option value="fixo">Valor Fixo (R$)</option>
               </select>
             </div>
 
-            <FormField
-              label={formData.tipoDesconto === "percentual" ? "Desconto (%)" : "Desconto (R$)"}
-              id="valorDesconto"
-              type="number"
-              min="0"
-              max={formData.tipoDesconto === "percentual" ? "100" : undefined}
-              step="0.01"
-              value={formData.valorDesconto}
-              onChange={(e) =>
-                setFormData({ ...formData, valorDesconto: e.target.value })
-              }
-              required
-            />
+            <div className="space-y-[var(--space-2)]">
+              <Label htmlFor="valorDesconto">
+                {formData.tipoDesconto === "percentual" ? "Desconto (%)" : "Desconto (R$)"} *
+              </Label>
+              <Input
+                id="valorDesconto"
+                type="number"
+                min="0"
+                max={formData.tipoDesconto === "percentual" ? "100" : undefined}
+                step="0.01"
+                value={formData.valorDesconto}
+                onChange={(e) =>
+                  setFormData({ ...formData, valorDesconto: e.target.value })
+                }
+                placeholder="0.00"
+                required
+              />
+            </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-[var(--space-3)]">
               <input
                 type="checkbox"
                 id="ativo"
@@ -360,15 +365,13 @@ export default function PrecosPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, ativo: e.target.checked })
                 }
-                className="h-4 w-4 rounded border-gray-300"
+                className="size-4 rounded-[var(--radius-sm)] border-[hsl(var(--color-neutral-300))] text-[hsl(var(--color-brand-500))] focus:ring-[hsl(var(--color-brand-500))]"
               />
-              <label htmlFor="ativo" className="text-sm font-medium">
-                Lista ativa
-              </label>
+              <Label htmlFor="ativo" className="cursor-pointer">Lista ativa</Label>
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseDialog}>
+              <Button type="button" variant="secondary" onClick={handleCloseDialog}>
                 Cancelar
               </Button>
               <Button type="submit">
