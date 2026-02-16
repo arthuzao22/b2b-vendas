@@ -1,62 +1,107 @@
-// SearchInput component with debounce
 'use client';
 
-import { Input } from './input';
+import { useState, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
-import { useDebounce } from '@/hooks/useDebounce';
-import { useEffect, useState } from 'react';
-import { Button } from './button';
+import { cn } from '@/lib/utils';
 
 interface SearchInputProps {
-  value?: string;
-  onChange: (value: string) => void;
   placeholder?: string;
-  debounceMs?: number;
+  onSearch?: (query: string) => void;
+  onChange?: (query: string) => void;
+  defaultValue?: string;
+  variant?: 'compact' | 'full';
   className?: string;
+  shortcutHint?: boolean;
 }
 
 export function SearchInput({
-  value = '',
-  onChange,
   placeholder = 'Buscar...',
-  debounceMs = 500,
+  onSearch,
+  onChange,
+  defaultValue = '',
+  variant = 'compact',
   className,
+  shortcutHint = false,
 }: SearchInputProps) {
-  const [localValue, setLocalValue] = useState(value);
-  const debouncedValue = useDebounce(localValue, debounceMs);
+  const [query, setQuery] = useState(defaultValue);
 
-  useEffect(() => {
-    onChange(debouncedValue);
-  }, [debouncedValue, onChange]);
+  const handleChange = useCallback(
+    (value: string) => {
+      setQuery(value);
+      onChange?.(value);
+    },
+    [onChange]
+  );
 
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      onSearch?.(query);
+    }
+  };
 
   const handleClear = () => {
-    setLocalValue('');
-    onChange('');
+    setQuery('');
+    onChange?.('');
+    onSearch?.('');
   };
 
   return (
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-      <Input
-        value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
-        placeholder={placeholder}
-        className={`pl-9 pr-9 ${className}`}
+    <div
+      className={cn(
+        "relative",
+        variant === 'compact' ? "w-80" : "w-full max-w-[640px]",
+        className
+      )}
+    >
+      <Search
+        className={cn(
+          "absolute left-[var(--space-3)] top-1/2 -translate-y-1/2",
+          "text-[hsl(var(--color-neutral-400))]",
+          variant === 'full' ? "size-5" : "size-4"
+        )}
+        aria-hidden="true"
       />
-      {localValue && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 p-0"
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => handleChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        className={cn(
+          "w-full rounded-[var(--radius-md)]",
+          "border border-[hsl(var(--color-neutral-200))]",
+          "bg-[hsl(var(--color-neutral-0))]",
+          "text-[hsl(var(--color-neutral-700))]",
+          "placeholder:text-[hsl(var(--color-neutral-400))]",
+          "transition-all duration-[var(--transition-fast)]",
+          "focus:outline-none focus:border-[hsl(var(--color-brand-500))]",
+          "focus:ring-2 focus:ring-[hsl(var(--color-brand-500)/0.2)]",
+          variant === 'full'
+            ? "h-12 pl-11 pr-[var(--space-4)] text-[length:var(--text-md)]"
+            : "h-10 pl-10 pr-[var(--space-4)] text-[length:var(--text-base)]"
+        )}
+        aria-label={placeholder}
+      />
+      {query && (
+        <button
           onClick={handleClear}
+          className={cn(
+            "absolute top-1/2 -translate-y-1/2",
+            "text-[hsl(var(--color-neutral-400))] hover:text-[hsl(var(--color-neutral-600))]",
+            "transition-colors duration-[var(--transition-fast)]",
+            shortcutHint ? "right-16" : "right-[var(--space-3)]"
+          )}
+          aria-label="Limpar busca"
         >
-          <X className="h-4 w-4" />
-        </Button>
+          <X className="size-3.5" />
+        </button>
+      )}
+      {shortcutHint && !query && (
+        <div className="absolute right-[var(--space-3)] top-1/2 -translate-y-1/2">
+          <kbd className="px-[var(--space-1-5)] py-0.5 text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-400))] bg-[hsl(var(--color-neutral-100))] rounded-[var(--radius-sm)] font-mono">
+            ⌘K
+          </kbd>
+        </div>
       )}
     </div>
   );

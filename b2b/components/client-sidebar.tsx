@@ -13,23 +13,18 @@ import {
   LogOut,
   Menu,
   X,
+  ShoppingBag as Logo,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { NotificationDropdown } from "@/components/ui/notification-dropdown"
-
-interface NavItem {
-  title: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-}
 
 interface ClientSidebarProps {
   userName: string
   userRole: string
 }
 
-const navItems: NavItem[] = [
+const navItems = [
   { title: "Dashboard", href: "/dashboard/cliente", icon: LayoutDashboard },
   { title: "Catálogo", href: "/dashboard/cliente/catalogo", icon: ShoppingBag },
   { title: "Carrinho", href: "/carrinho", icon: ShoppingCart },
@@ -45,97 +40,140 @@ export function ClientSidebar({ userName, userRole }: ClientSidebarProps) {
     await signOut({ callbackUrl: "/auth/login" })
   }
 
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
+      {/* Logo */}
+      <div className="p-[var(--space-6)] border-b border-[hsl(var(--color-neutral-100))]">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-[var(--space-2)] no-underline">
+            <div className="flex items-center justify-center size-8 bg-[hsl(var(--color-brand-500))] rounded-[var(--radius-md)]">
+              <Logo className="size-4.5 text-white" aria-hidden="true" />
+            </div>
+            <span className="text-[length:var(--text-md)] font-bold text-[hsl(var(--color-neutral-900))]">
+              B2B Vendas
+            </span>
+          </Link>
+          <NotificationDropdown />
+        </div>
+      </div>
+
+      {/* User Info */}
+      <div className="px-[var(--space-6)] py-[var(--space-5)] border-b border-[hsl(var(--color-neutral-100))]">
+        <div className="flex items-center gap-[var(--space-3)]">
+          <div className="flex items-center justify-center size-10 bg-[hsl(var(--color-brand-50))] rounded-full shrink-0">
+            <span className="text-[length:var(--text-sm)] font-semibold text-[hsl(var(--color-brand-600))]">
+              {userName.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-800))] truncate">
+              {userName}
+            </p>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] capitalize">
+              {userRole}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-[var(--space-4)] py-[var(--space-3)]" aria-label="Menu do cliente">
+        <div className="space-y-[var(--space-0-5)]">
+          {navItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={cn(
+                  "group relative flex items-center gap-[var(--space-3)]",
+                  "h-10 px-[var(--space-4)] rounded-[var(--radius-md)]",
+                  "text-[length:var(--text-sm)] font-medium no-underline",
+                  "transition-all duration-[var(--transition-base)]",
+                  isActive
+                    ? "bg-[hsl(var(--color-brand-50))] text-[hsl(var(--color-brand-600))]"
+                    : "text-[hsl(var(--color-neutral-600))] hover:bg-[hsl(var(--color-neutral-50))] hover:text-[hsl(var(--color-neutral-800))]"
+                )}
+              >
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[hsl(var(--color-brand-500))] rounded-r-full" />
+                )}
+                <Icon
+                  className={cn(
+                    "size-5 shrink-0 transition-colors duration-[var(--transition-fast)]",
+                    isActive
+                      ? "text-[hsl(var(--color-brand-500))]"
+                      : "text-[hsl(var(--color-neutral-400))] group-hover:text-[hsl(var(--color-neutral-600))]"
+                  )}
+                  aria-hidden="true"
+                />
+                <span>{item.title}</span>
+              </Link>
+            )
+          })}
+        </div>
+      </nav>
+
+      {/* Logout */}
+      <div className="p-[var(--space-4)] border-t border-[hsl(var(--color-neutral-100))]">
+        <button
+          onClick={handleLogout}
+          className={cn(
+            "flex items-center gap-[var(--space-3)] w-full",
+            "h-10 px-[var(--space-4)] rounded-[var(--radius-md)]",
+            "text-[length:var(--text-sm)] font-medium",
+            "text-[hsl(var(--color-neutral-500))]",
+            "transition-colors duration-[var(--transition-fast)]",
+            "hover:bg-[hsl(var(--color-error-50))] hover:text-[hsl(var(--color-error-600))]",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--color-brand-500))]"
+          )}
+        >
+          <LogOut className="size-5" aria-hidden="true" />
+          Sair
+        </button>
+      </div>
+    </div>
+  )
+
   return (
     <>
       {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
+      <div className="lg:hidden fixed top-[var(--space-4)] left-[var(--space-4)] z-[var(--z-sticky)]">
         <Button
-          variant="outline"
+          variant="secondary"
           size="icon"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+          aria-expanded={isMobileMenuOpen}
         >
-          {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          {isMobileMenuOpen ? <X /> : <Menu />}
         </Button>
       </div>
 
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 left-0 z-40 h-screen w-64 bg-card border-r transition-transform lg:translate-x-0",
+          "fixed top-0 left-0 h-screen w-64",
+          "bg-[hsl(var(--color-neutral-0))]",
+          "border-r border-[hsl(var(--color-neutral-100))]",
+          "z-[var(--z-sticky)]",
+          "transition-transform duration-[var(--transition-slow)]",
+          "lg:translate-x-0",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex flex-col h-full">
-          {/* Logo/Header */}
-          <div className="p-6 border-b">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-primary rounded-md" />
-                <span className="text-xl font-bold">B2B Vendas</span>
-              </Link>
-              <NotificationDropdown />
-            </div>
-          </div>
-
-          {/* User Info */}
-          <div className="p-6 border-b">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                <span className="text-sm font-semibold text-primary">
-                  {userName.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{userName}</p>
-                <p className="text-xs text-muted-foreground capitalize">{userRole}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto p-4 space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center space-x-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span>{item.title}</span>
-                </Link>
-              )
-            })}
-          </nav>
-
-          {/* Logout Button */}
-          <div className="p-4 border-t">
-            <Button
-              variant="ghost"
-              className="w-full justify-start text-muted-foreground hover:text-destructive"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-3 h-5 w-5" />
-              Sair
-            </Button>
-          </div>
-        </div>
+        {sidebarContent}
       </aside>
 
-      {/* Overlay for mobile */}
+      {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          className="fixed inset-0 z-[var(--z-overlay)] bg-[hsl(var(--color-neutral-900)/0.5)] lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
     </>

@@ -2,10 +2,12 @@
 'use client';
 
 import { ReactNode, useState } from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from './button';
 import { Input } from './input';
 import { EmptyState } from './empty-state';
+import { Search } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface Column<T> {
   key: string;
@@ -26,10 +28,13 @@ interface DataTableProps<T> {
     currentPage: number;
     totalPages: number;
     pageSize: number;
+    total?: number;
     onPageChange: (page: number) => void;
   };
   emptyMessage?: string;
+  emptyDescription?: string;
   loading?: boolean;
+  onRowClick?: (item: T) => void;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -41,13 +46,14 @@ export function DataTable<T extends Record<string, any>>({
   onSearch,
   pagination,
   emptyMessage = 'Nenhum item encontrado',
+  emptyDescription = '',
   loading = false,
+  onRowClick,
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Ensure data is always an array
   const safeData = Array.isArray(data) ? data : [];
 
   const handleSort = (key: string) => {
@@ -80,72 +86,113 @@ export function DataTable<T extends Record<string, any>>({
     })
     : safeData;
 
+  // Skeleton loading state
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-[var(--space-4)]">
         {searchable && (
-          <div className="flex items-center gap-4">
-            <Input placeholder={searchPlaceholder} value="" disabled className="max-w-sm" />
+          <div className="flex items-center gap-[var(--space-4)]">
+            <Input
+              placeholder={searchPlaceholder}
+              value=""
+              disabled
+              className="max-w-sm"
+              icon={<Search />}
+            />
           </div>
         )}
-        <div className="rounded-md border">
-          <div className="p-8 text-center text-muted-foreground">
-            Carregando...
+        <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--color-neutral-200))] overflow-hidden">
+          {/* Skeleton header */}
+          <div className="bg-[hsl(var(--color-neutral-50))] border-b border-[hsl(var(--color-neutral-100))] px-[var(--space-4)] h-11 flex items-center gap-[var(--space-8)]">
+            {columns.map((col) => (
+              <div key={col.key} className="h-3 w-20 rounded animate-shimmer" />
+            ))}
           </div>
+          {/* Skeleton rows */}
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className={cn(
+              "px-[var(--space-4)] h-[52px] flex items-center gap-[var(--space-8)]",
+              "border-b border-[hsl(var(--color-neutral-100))] last:border-0",
+              i % 2 === 0 ? "bg-[hsl(var(--color-neutral-0))]" : "bg-[hsl(var(--color-neutral-25))]"
+            )}>
+              {columns.map((col) => (
+                <div key={col.key} className="h-3 w-24 rounded animate-shimmer" />
+              ))}
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
+  // Empty state
   if (safeData.length === 0 && !searchQuery) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-[var(--space-4)]">
         {searchable && (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-[var(--space-4)]">
             <Input
               placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="max-w-sm"
+              icon={<Search />}
             />
           </div>
         )}
-        <EmptyState title={emptyMessage} description="" />
+        <EmptyState title={emptyMessage} description={emptyDescription} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-[var(--space-4)]">
       {searchable && (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-[var(--space-4)]">
           <Input
             placeholder={searchPlaceholder}
             value={searchQuery ?? ""}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="max-w-sm"
+            icon={<Search />}
           />
         </div>
       )}
 
-      <div className="rounded-md border">
+      <div className="rounded-[var(--radius-lg)] border border-[hsl(var(--color-neutral-200))] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b bg-gray-50">
+              <tr className="border-b border-[hsl(var(--color-neutral-100))] bg-[hsl(var(--color-neutral-50))]">
                 {columns.map((column) => (
                   <th
                     key={column.key}
-                    className="px-4 py-3 text-left text-sm font-medium text-gray-700"
+                    className={cn(
+                      "px-[var(--space-4)] h-11 text-left",
+                      "text-[length:var(--text-xs)] font-semibold uppercase tracking-[var(--tracking-wider)]",
+                      "text-[hsl(var(--color-neutral-500))]"
+                    )}
                     style={{ width: column.width }}
                   >
                     {column.sortable ? (
                       <button
                         onClick={() => handleSort(column.key)}
-                        className="flex items-center gap-1 hover:text-gray-900"
+                        className={cn(
+                          "flex items-center gap-[var(--space-1)] transition-colors duration-[var(--transition-fast)]",
+                          "hover:text-[hsl(var(--color-neutral-800))]",
+                          sortKey === column.key && "text-[hsl(var(--color-brand-500))]"
+                        )}
                       >
                         {column.label}
-                        <ArrowUpDown className="h-4 w-4" />
+                        {sortKey === column.key ? (
+                          sortOrder === 'asc' ? (
+                            <ArrowUp className="size-3 transition-transform duration-[var(--transition-fast)]" />
+                          ) : (
+                            <ArrowDown className="size-3 transition-transform duration-[var(--transition-fast)]" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3 text-[hsl(var(--color-neutral-400))]" />
+                        )}
                       </button>
                     ) : (
                       column.label
@@ -155,13 +202,23 @@ export function DataTable<T extends Record<string, any>>({
               </tr>
             </thead>
             <tbody>
-              {sortedData.map((item) => (
+              {sortedData.map((item, index) => (
                 <tr
                   key={keyExtractor(item)}
-                  className="border-b last:border-0 hover:bg-gray-50 transition-colors"
+                  className={cn(
+                    "border-b border-[hsl(var(--color-neutral-100))] last:border-0",
+                    "transition-colors duration-[var(--transition-fast)]",
+                    "hover:bg-[hsl(var(--color-neutral-50))]",
+                    index % 2 === 0 ? "bg-[hsl(var(--color-neutral-0))]" : "bg-[hsl(var(--color-neutral-25))]",
+                    onRowClick && "cursor-pointer"
+                  )}
+                  onClick={onRowClick ? () => onRowClick(item) : undefined}
                 >
                   {columns.map((column) => (
-                    <td key={column.key} className="px-4 py-3 text-sm">
+                    <td
+                      key={column.key}
+                      className="px-[var(--space-4)] h-[52px] text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-700))]"
+                    >
                       {column.render ? column.render(item) : item[column.key]}
                     </td>
                   ))}
@@ -173,42 +230,49 @@ export function DataTable<T extends Record<string, any>>({
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Página {pagination.currentPage} de {pagination.totalPages}
+        <div className="flex items-center justify-between h-12">
+          <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
+            {pagination.total
+              ? `Mostrando ${((pagination.currentPage - 1) * pagination.pageSize) + 1} - ${Math.min(pagination.currentPage * pagination.pageSize, pagination.total)} de ${pagination.total}`
+              : `Página ${pagination.currentPage} de ${pagination.totalPages}`
+            }
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-[var(--space-1)]">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => pagination.onPageChange(1)}
               disabled={pagination.currentPage === 1}
+              aria-label="Primeira página"
             >
-              <ChevronsLeft className="h-4 w-4" />
+              <ChevronsLeft className="size-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
               disabled={pagination.currentPage === 1}
+              aria-label="Página anterior"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="size-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
               disabled={pagination.currentPage === pagination.totalPages}
+              aria-label="Próxima página"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="size-4" />
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => pagination.onPageChange(pagination.totalPages)}
               disabled={pagination.currentPage === pagination.totalPages}
+              aria-label="Última página"
             >
-              <ChevronsRight className="h-4 w-4" />
+              <ChevronsRight className="size-4" />
             </Button>
           </div>
         </div>

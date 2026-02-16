@@ -1,13 +1,31 @@
-// Empty State component for when there's no data
-import { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+'use client';
+
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { LucideIcon } from 'lucide-react';
+import { Button } from './button';
+
+interface ActionObject {
+  label: string;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary';
+}
 
 interface EmptyStateProps {
   icon?: LucideIcon;
   title: string;
   description?: string;
-  action?: React.ReactNode;
+  action?: ActionObject | React.ReactNode;
   className?: string;
+}
+
+function isActionObject(action: unknown): action is ActionObject {
+  return (
+    typeof action === 'object' &&
+    action !== null &&
+    'label' in action &&
+    'onClick' in action
+  );
 }
 
 export function EmptyState({
@@ -18,17 +36,43 @@ export function EmptyState({
   className,
 }: EmptyStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center py-12 px-4 text-center", className)}>
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center py-[var(--space-16)] px-[var(--space-6)]",
+        className
+      )}
+    >
       {Icon && (
-        <div className="mb-4 rounded-full bg-gray-100 p-6">
-          <Icon className="h-12 w-12 text-gray-400" />
+        <div className="mb-[var(--space-4)]">
+          <Icon
+            className="size-16 text-[hsl(var(--color-neutral-300))]"
+            strokeWidth={1.5}
+            aria-hidden="true"
+          />
         </div>
       )}
-      <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+      <h3 className="text-[length:var(--text-md)] font-semibold text-[hsl(var(--color-neutral-700))] text-center">
+        {title}
+      </h3>
       {description && (
-        <p className="mt-2 text-sm text-gray-500 max-w-md">{description}</p>
+        <p className="mt-[var(--space-1-5)] text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] text-center max-w-[360px]">
+          {description}
+        </p>
       )}
-      {action && <div className="mt-6">{action}</div>}
+      {action && (
+        <div className="mt-[var(--space-6)]">
+          {isActionObject(action) ? (
+            <Button
+              variant={action.variant || 'primary'}
+              onClick={action.onClick}
+            >
+              {action.label}
+            </Button>
+          ) : (
+            action
+          )}
+        </div>
+      )}
     </div>
   );
 }

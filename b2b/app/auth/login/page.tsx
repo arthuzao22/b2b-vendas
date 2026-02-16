@@ -7,7 +7,8 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, AlertCircle } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { ShoppingBag, AlertCircle, Mail, Lock } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,7 +38,6 @@ export default function LoginPage() {
       }
 
       if (result?.ok) {
-        // Redirect will be handled by NextAuth callback
         router.push("/dashboard");
         router.refresh();
       }
@@ -48,35 +48,42 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
-            <ShoppingBag className="h-8 w-8" />
-            <span>B2B Marketplace</span>
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-[hsl(var(--color-neutral-25))] px-[var(--space-4)] py-[var(--space-12)]">
+      <div className="w-full max-w-[420px]">
+        {/* Logo */}
+        <div className="flex justify-center mb-[var(--space-8)]">
+          <Link
+            href="/"
+            className="flex items-center gap-[var(--space-2)] no-underline"
+          >
+            <ShoppingBag className="size-8 text-[hsl(var(--color-brand-500))]" aria-hidden="true" />
+            <span className="text-[length:var(--text-xl)] font-bold text-[hsl(var(--color-neutral-900))]">
+              B2B Marketplace
+            </span>
           </Link>
         </div>
 
-        <Card>
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Bem-vindo de volta</CardTitle>
-            <CardDescription className="text-center">
+        <Card variant="elevated">
+          <CardHeader className="text-center space-y-[var(--space-1-5)]">
+            <CardTitle className="text-[length:var(--text-xl)]">Bem-vindo de volta</CardTitle>
+            <CardDescription>
               Entre com suas credenciais para acessar sua conta
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-[var(--space-5)]">
               {error && (
-                <div className="flex items-center gap-2 p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-md">
-                  <AlertCircle className="h-4 w-4" />
+                <div
+                  className="flex items-center gap-[var(--space-2)] p-[var(--space-3)] text-[length:var(--text-sm)] text-[hsl(var(--color-error-700))] bg-[hsl(var(--color-error-50))] border border-[hsl(var(--color-error-500)/0.2)] rounded-[var(--radius-md)]"
+                  role="alert"
+                >
+                  <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
                   <span>{error}</span>
                 </div>
               )}
 
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium">
-                  Email
-                </label>
+              <div className="space-y-[var(--space-1-5)]">
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
@@ -85,13 +92,20 @@ export default function LoginPage() {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
                   disabled={loading}
+                  icon={<Mail />}
                 />
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="senha" className="text-sm font-medium">
-                  Senha
-                </label>
+              <div className="space-y-[var(--space-1-5)]">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="senha">Senha</Label>
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-[length:var(--text-xs)] text-[hsl(var(--color-brand-500))] hover:text-[hsl(var(--color-brand-600))] no-underline transition-colors duration-[var(--transition-fast)]"
+                  >
+                    Esqueceu a senha?
+                  </Link>
+                </div>
                 <Input
                   id="senha"
                   type="password"
@@ -100,16 +114,20 @@ export default function LoginPage() {
                   onChange={(e) => setFormData({ ...formData, senha: e.target.value })}
                   required
                   disabled={loading}
+                  icon={<Lock />}
                 />
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" loading={loading}>
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
 
-              <div className="text-center text-sm text-muted-foreground">
+              <div className="text-center text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
                 Não tem uma conta?{" "}
-                <Link href="/auth/register" className="text-primary hover:underline font-medium">
+                <Link
+                  href="/auth/register"
+                  className="text-[hsl(var(--color-brand-500))] hover:text-[hsl(var(--color-brand-600))] font-medium no-underline"
+                >
                   Cadastre-se
                 </Link>
               </div>
@@ -117,8 +135,11 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 text-center">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-primary">
+        <div className="mt-[var(--space-6)] text-center">
+          <Link
+            href="/"
+            className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] hover:text-[hsl(var(--color-brand-500))] no-underline transition-colors duration-[var(--transition-fast)]"
+          >
             ← Voltar para página inicial
           </Link>
         </div>

@@ -1,100 +1,118 @@
 import Link from "next/link";
-import { ShoppingBag, Mail, Phone, MapPin } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
+import { Container } from "@/components/layout/container";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="w-full border-t bg-gray-50">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-xl font-bold text-primary">
-              <ShoppingBag className="h-6 w-6" />
-              <span>B2B Marketplace</span>
+    <footer className="bg-[hsl(var(--color-neutral-900))]" role="contentinfo">
+      <Container>
+        <div className="py-[var(--space-16)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[var(--space-10)]">
+            {/* Brand Column */}
+            <div className="space-y-[var(--space-4)]">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-[var(--space-2)] text-[hsl(var(--color-neutral-0))] no-underline hover:text-[hsl(var(--color-neutral-0))]"
+              >
+                <ShoppingBag className="size-6 text-[hsl(var(--color-brand-400))]" aria-hidden="true" />
+                <span className="text-[length:var(--text-md)] font-bold">B2B Marketplace</span>
+              </Link>
+              <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-400))] leading-relaxed max-w-[280px]">
+                Conectando fornecedores e compradores. A plataforma B2B mais completa do Brasil.
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Conectando fornecedores e compradores para negócios B2B eficientes e transparentes.
-            </p>
-          </div>
 
-          {/* Links */}
-          <div>
-            <h3 className="font-semibold mb-4">Navegação</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/fornecedores"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Fornecedores
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/catalogo"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Catálogo
-                </Link>
-              </li>
-            </ul>
-          </div>
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-[length:var(--text-sm)] font-semibold text-[hsl(var(--color-neutral-0))] mb-[var(--space-4)]">
+                Links Rápidos
+              </h3>
+              <ul className="space-y-[var(--space-3)]">
+                {[
+                  { label: "Início", href: "/" },
+                  { label: "Catálogo", href: "/catalogo" },
+                  { label: "Fornecedores", href: "/fornecedores" },
+                  { label: "Sobre nós", href: "#" },
+                ].map((link) => (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-400))] hover:text-[hsl(var(--color-brand-400))] no-underline transition-colors duration-[var(--transition-fast)]"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Auth */}
-          <div>
-            <h3 className="font-semibold mb-4">Acesso</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/auth/login"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Login
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/auth/register"
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Cadastrar
-                </Link>
-              </li>
-            </ul>
-          </div>
+            {/* Support */}
+            <div>
+              <h3 className="text-[length:var(--text-sm)] font-semibold text-[hsl(var(--color-neutral-0))] mb-[var(--space-4)]">
+                Suporte
+              </h3>
+              <ul className="space-y-[var(--space-3)]">
+                {[
+                  { label: "Central de Ajuda", href: "#" },
+                  { label: "FAQ", href: "#" },
+                  { label: "Contato", href: "#" },
+                  { label: "Status do Sistema", href: "#" },
+                ].map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-400))] hover:text-[hsl(var(--color-brand-400))] no-underline transition-colors duration-[var(--transition-fast)]"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Contact */}
-          <div>
-            <h3 className="font-semibold mb-4">Contato</h3>
-            <ul className="space-y-2">
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                <span>contato@b2bmarketplace.com</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>(11) 1234-5678</span>
-              </li>
-              <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>São Paulo, Brasil</span>
-              </li>
-            </ul>
+            {/* Contact */}
+            <div>
+              <h3 className="text-[length:var(--text-sm)] font-semibold text-[hsl(var(--color-neutral-0))] mb-[var(--space-4)]">
+                Contato
+              </h3>
+              <ul className="space-y-[var(--space-3)]">
+                <li className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-400))]">
+                  contato@b2bmarketplace.com.br
+                </li>
+                <li className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-400))]">
+                  (11) 3000-0000
+                </li>
+                <li className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-400))]">
+                  São Paulo, SP — Brasil
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} B2B Marketplace. Todos os direitos reservados.</p>
+        {/* Bottom bar */}
+        <div className="border-t border-[hsl(var(--color-neutral-800))] py-[var(--space-6)] flex flex-col sm:flex-row items-center justify-between gap-[var(--space-4)]">
+          <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-400))]">
+            © {currentYear} B2B Marketplace. Todos os direitos reservados.
+          </p>
+          <div className="flex items-center gap-[var(--space-6)]">
+            <Link
+              href="#"
+              className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-400))] hover:text-[hsl(var(--color-brand-400))] no-underline transition-colors duration-[var(--transition-fast)]"
+            >
+              Termos de Uso
+            </Link>
+            <Link
+              href="#"
+              className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-400))] hover:text-[hsl(var(--color-brand-400))] no-underline transition-colors duration-[var(--transition-fast)]"
+            >
+              Privacidade
+            </Link>
+          </div>
         </div>
-      </div>
+      </Container>
     </footer>
   );
 }

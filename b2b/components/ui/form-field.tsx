@@ -1,4 +1,3 @@
-// FormField component for consistent form inputs
 'use client';
 
 import { Label } from './label';
@@ -11,36 +10,43 @@ export interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   helperText?: string;
   required?: boolean;
+  icon?: React.ReactNode;
 }
 
 export const FormField = forwardRef<HTMLInputElement, FormFieldProps>(
-  ({ label, error, helperText, required, className, ...props }, ref) => {
+  ({ label, error, helperText, required, className, icon, id, ...props }, ref) => {
     const hasError = !!error;
 
     return (
-      <div className="space-y-2">
-        <Label htmlFor={props.id} className="text-sm font-medium">
+      <div className="space-y-[var(--space-1-5)]">
+        <Label htmlFor={id} className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-700))]">
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && <span className="text-[hsl(var(--color-error-500))] ml-0.5" aria-hidden="true">*</span>}
         </Label>
         <Input
           ref={ref}
-          className={`${hasError ? 'border-red-500 focus-visible:ring-red-500' : ''} ${className}`}
+          id={id}
+          className={className}
+          error={hasError}
+          icon={icon}
           aria-invalid={hasError}
-          aria-describedby={hasError ? `${props.id}-error` : undefined}
+          aria-describedby={hasError ? `${id}-error` : helperText ? `${id}-helper` : undefined}
           {...props}
         />
         {hasError && (
           <div
-            id={`${props.id}-error`}
-            className="flex items-center gap-1 text-sm text-red-600"
+            id={`${id}-error`}
+            className="flex items-center gap-[var(--space-1)] text-[length:var(--text-xs)] text-[hsl(var(--color-error-500))]"
+            role="alert"
           >
-            <AlertCircle className="h-4 w-4" />
+            <AlertCircle className="size-3.5 shrink-0" aria-hidden="true" />
             <span>{error}</span>
           </div>
         )}
         {helperText && !hasError && (
-          <p className="text-sm text-muted-foreground">{helperText}</p>
+          <p id={`${id}-helper`} className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))]">
+            {helperText}
+          </p>
         )}
       </div>
     );

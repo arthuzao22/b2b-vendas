@@ -1,16 +1,18 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/ui/status-badge"
+import { PageHeader } from "@/components/layout/page-header"
 import { requireFornecedor } from "@/lib/api-helpers"
 import { prisma } from "@/lib/prisma"
 import { formatCurrency, formatDate } from "@/lib/utils"
 import { DashboardCharts } from "@/components/charts/dashboard-charts"
-import { 
-  DollarSign, 
-  ShoppingBag, 
-  TrendingUp, 
-  Users, 
-  Package, 
-  AlertTriangle 
+import {
+  DollarSign,
+  ShoppingBag,
+  TrendingUp,
+  Users,
+  Package,
+  AlertTriangle
 } from "lucide-react"
 
 interface KPI {
@@ -32,7 +34,7 @@ async function getKPIs(fornecedorId: string): Promise<KPI> {
       },
     }),
     prisma.clienteFornecedor.count({
-      where: { 
+      where: {
         fornecedorId,
         cliente: {
           usuario: {
@@ -108,7 +110,6 @@ async function getChartData(fornecedorId: string) {
     },
   });
 
-  // Orders by month (last 6 months)
   const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
   const ordersByMonth = Array.from({ length: 6 }, (_, i) => {
     const date = new Date();
@@ -123,27 +124,26 @@ async function getChartData(fornecedorId: string) {
     };
   }).reverse();
 
-  // Orders by status
   const statusCount = pedidos.reduce((acc, p) => {
     acc[p.status] = (acc[p.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
+  const statusLabelsMap: Record<string, string> = {
+    pendente: "Pendente",
+    confirmado: "Confirmado",
+    em_preparacao: "Em Preparação",
+    enviado: "Enviado",
+    entregue: "Entregue",
+    cancelado: "Cancelado",
+  };
+
   const ordersByStatus = Object.entries(statusCount).map(([status, value]) => ({
-    name: statusLabels[status as keyof typeof statusLabels] || status,
+    name: statusLabelsMap[status] || status,
     value,
   }));
 
   return { ordersByMonth, ordersByStatus };
-}
-
-const statusColors: Record<string, "default" | "success" | "warning" | "destructive"> = {
-  pendente: "warning",
-  confirmado: "default",
-  em_preparacao: "default",
-  enviado: "default",
-  entregue: "success",
-  cancelado: "destructive",
 }
 
 const statusLabels: Record<string, string> = {
@@ -155,9 +155,43 @@ const statusLabels: Record<string, string> = {
   cancelado: "Cancelado",
 }
 
+// KPI Card component
+function KPICard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+  iconColor,
+}: {
+  title: string;
+  value: string | number;
+  subtitle: string;
+  icon: React.ComponentType<{ className?: string }>;
+  iconColor?: string;
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+        <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">
+          {title}
+        </CardTitle>
+        <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-neutral-50))]">
+          <Icon className={`size-4 ${iconColor || "text-[hsl(var(--color-neutral-500))]"}`} />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{value}</div>
+        <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
+          {subtitle}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default async function FornecedorDashboard() {
   const { fornecedorId } = await requireFornecedor()
-  
+
   const [kpis, recentOrders, lowStockProducts, chartData] = await Promise.all([
     getKPIs(fornecedorId),
     getRecentOrders(fornecedorId),
@@ -166,97 +200,60 @@ export default async function FornecedorDashboard() {
   ])
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Visão geral do seu negócio
-        </p>
-      </div>
+    <div className="space-y-[var(--space-8)]">
+      <PageHeader
+        title="Dashboard"
+        subtitle="Visão geral do seu negócio"
+      />
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Faturamento</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(kpis.totalFaturamento)}</div>
-            <p className="text-xs text-muted-foreground">
-              {kpis.totalPedidos} pedidos realizados
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Pedidos</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.totalPedidos}</div>
-            <p className="text-xs text-muted-foreground">
-              {kpis.pedidosPendentes} pendentes
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(kpis.ticketMedio)}</div>
-            <p className="text-xs text-muted-foreground">
-              Por pedido
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clientes Ativos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.clientesAtivos}</div>
-            <p className="text-xs text-muted-foreground">
-              Clientes cadastrados
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produtos Ativos</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.produtosAtivos}</div>
-            <p className="text-xs text-muted-foreground">
-              No catálogo
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pedidos Pendentes</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{kpis.pedidosPendentes}</div>
-            <p className="text-xs text-muted-foreground">
-              Aguardando confirmação
-            </p>
-          </CardContent>
-        </Card>
+      <div className="grid gap-[var(--space-4)] md:grid-cols-2 lg:grid-cols-3">
+        <KPICard
+          title="Total Faturamento"
+          value={formatCurrency(kpis.totalFaturamento)}
+          subtitle={`${kpis.totalPedidos} pedidos realizados`}
+          icon={DollarSign}
+          iconColor="text-[hsl(var(--color-success-500))]"
+        />
+        <KPICard
+          title="Total de Pedidos"
+          value={kpis.totalPedidos}
+          subtitle={`${kpis.pedidosPendentes} pendentes`}
+          icon={ShoppingBag}
+          iconColor="text-[hsl(var(--color-brand-500))]"
+        />
+        <KPICard
+          title="Ticket Médio"
+          value={formatCurrency(kpis.ticketMedio)}
+          subtitle="Por pedido"
+          icon={TrendingUp}
+          iconColor="text-[hsl(var(--color-info-500))]"
+        />
+        <KPICard
+          title="Clientes Ativos"
+          value={kpis.clientesAtivos}
+          subtitle="Clientes cadastrados"
+          icon={Users}
+          iconColor="text-[hsl(var(--color-brand-500))]"
+        />
+        <KPICard
+          title="Produtos Ativos"
+          value={kpis.produtosAtivos}
+          subtitle="No catálogo"
+          icon={Package}
+          iconColor="text-[hsl(var(--color-neutral-600))]"
+        />
+        <KPICard
+          title="Pedidos Pendentes"
+          value={kpis.pedidosPendentes}
+          subtitle="Aguardando confirmação"
+          icon={AlertTriangle}
+          iconColor="text-[hsl(var(--color-warning-500))]"
+        />
       </div>
 
       {/* Recent Orders & Low Stock */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-[var(--space-6)] md:grid-cols-2">
         {/* Recent Orders */}
         <Card>
           <CardHeader>
@@ -264,28 +261,33 @@ export default async function FornecedorDashboard() {
             <CardDescription>Últimos 5 pedidos realizados</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-[var(--space-4)]">
               {recentOrders.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-400))] text-center py-[var(--space-6)]">
                   Nenhum pedido encontrado
                 </p>
               ) : (
                 recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{order.numeroPedido}</p>
-                      <p className="text-xs text-muted-foreground">
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between border-b border-[hsl(var(--color-neutral-100))] pb-[var(--space-3)] last:border-0 last:pb-0"
+                  >
+                    <div className="space-y-[var(--space-0-5)]">
+                      <p className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-800))]">
+                        {order.numeroPedido}
+                      </p>
+                      <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))]">
                         {order.cliente.razaoSocial}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-400))]">
                         {formatDate(order.criadoEm)}
                       </p>
                     </div>
-                    <div className="text-right space-y-1">
-                      <p className="text-sm font-bold">{formatCurrency(Number(order.total))}</p>
-                      <Badge variant={statusColors[order.status] || "default"}>
-                        {statusLabels[order.status] || order.status}
-                      </Badge>
+                    <div className="text-right space-y-[var(--space-1)]">
+                      <p className="text-[length:var(--text-sm)] font-bold text-[hsl(var(--color-neutral-900))]">
+                        {formatCurrency(Number(order.total))}
+                      </p>
+                      <StatusBadge status={order.status} />
                     </div>
                   </div>
                 ))
@@ -301,23 +303,30 @@ export default async function FornecedorDashboard() {
             <CardDescription>Produtos com estoque baixo</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-[var(--space-4)]">
               {lowStockProducts.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-400))] text-center py-[var(--space-6)]">
                   Nenhum produto com estoque baixo
                 </p>
               ) : (
                 lowStockProducts.map((product) => (
-                  <div key={product.id} className="flex items-center justify-between border-b pb-3 last:border-0">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{product.nome}</p>
-                      <p className="text-xs text-muted-foreground">SKU: {product.sku}</p>
+                  <div
+                    key={product.id}
+                    className="flex items-center justify-between border-b border-[hsl(var(--color-neutral-100))] pb-[var(--space-3)] last:border-0 last:pb-0"
+                  >
+                    <div className="space-y-[var(--space-0-5)]">
+                      <p className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-800))]">
+                        {product.nome}
+                      </p>
+                      <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))]">
+                        SKU: {product.sku}
+                      </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-yellow-600">
+                      <p className="text-[length:var(--text-sm)] font-bold text-[hsl(var(--color-warning-600))]">
                         {product.quantidadeEstoque} un.
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))]">
                         Mín: {product.estoqueMinimo}
                       </p>
                     </div>
@@ -330,8 +339,8 @@ export default async function FornecedorDashboard() {
       </div>
 
       {/* Charts Section */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <DashboardCharts 
+      <div className="grid gap-[var(--space-6)] md:grid-cols-2">
+        <DashboardCharts
           ordersByMonth={chartData.ordersByMonth}
           ordersByStatus={chartData.ordersByStatus}
         />
