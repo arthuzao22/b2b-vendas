@@ -85,7 +85,7 @@ export function DataTable<T extends Record<string, any>>({
       <div className="space-y-4">
         {searchable && (
           <div className="flex items-center gap-4">
-            <Input placeholder={searchPlaceholder} disabled className="max-w-sm" />
+            <Input placeholder={searchPlaceholder} value="" disabled className="max-w-sm" />
           </div>
         )}
         <div className="rounded-md border">

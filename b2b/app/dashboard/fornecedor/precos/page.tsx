@@ -4,7 +4,14 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/data-table";
-import { Dialog } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Plus, Edit, Trash2, DollarSign, Users, Settings } from "lucide-react";
@@ -190,8 +197,8 @@ export default function PrecosPage() {
       render: (lista) => (
         <span
           className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${lista.ativo
-              ? "bg-green-100 text-green-800"
-              : "bg-gray-100 text-gray-800"
+            ? "bg-green-100 text-green-800"
+            : "bg-gray-100 text-gray-800"
             }`}
         >
           {lista.ativo ? "Ativa" : "Inativa"}
@@ -281,10 +288,15 @@ export default function PrecosPage() {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <div className="p-6 max-w-md">
-          <h2 className="text-xl font-bold mb-4">
-            {editingLista ? "Editar Lista de Preço" : "Nova Lista de Preço"}
-          </h2>
+        <DialogContent className="max-w-md bg-white dark:bg-gray-900">
+          <DialogHeader>
+            <DialogTitle>
+              {editingLista ? "Editar Lista de Preço" : "Nova Lista de Preço"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingLista ? "Atualize as informações da lista de preço" : "Crie uma nova lista de preço para seus clientes"}
+            </DialogDescription>
+          </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <FormField
               label="Nome"
@@ -304,7 +316,7 @@ export default function PrecosPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, descricao: e.target.value })
                 }
-                className="w-full px-3 py-2 border rounded-md"
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 rows={3}
               />
             </div>
@@ -319,7 +331,7 @@ export default function PrecosPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, tipoDesconto: e.target.value as any })
                 }
-                className="w-full px-3 py-2 border rounded-md"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="percentual">Percentual (%)</option>
                 <option value="fixo">Valor Fixo (R$)</option>
@@ -348,23 +360,23 @@ export default function PrecosPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, ativo: e.target.checked })
                 }
-                className="h-4 w-4"
+                className="h-4 w-4 rounded border-gray-300"
               />
               <label htmlFor="ativo" className="text-sm font-medium">
                 Lista ativa
               </label>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <DialogFooter>
               <Button type="button" variant="outline" onClick={handleCloseDialog}>
                 Cancelar
               </Button>
               <Button type="submit">
                 {editingLista ? "Salvar" : "Criar"}
               </Button>
-            </div>
+            </DialogFooter>
           </form>
-        </div>
+        </DialogContent>
       </Dialog>
     </div>
   );
