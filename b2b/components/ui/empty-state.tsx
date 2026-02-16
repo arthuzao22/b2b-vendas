@@ -27,7 +27,10 @@ function isActionObject(action: unknown): action is ActionObject {
 }
 
 function isComponentType(icon: unknown): icon is React.ComponentType<{ className?: string; strokeWidth?: number }> {
-  return typeof icon === 'function';
+  if (typeof icon === 'function') return true;
+  // forwardRef components are objects with $$typeof and render
+  if (typeof icon === 'object' && icon !== null && '$$typeof' in icon && 'render' in icon) return true;
+  return false;
 }
 
 export function EmptyState({
