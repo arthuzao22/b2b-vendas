@@ -168,7 +168,7 @@ export function DataTable<T extends Record<string, any>>({
                   <th
                     key={column.key}
                     className={cn(
-                      "px-[var(--space-4)] h-11 text-left",
+                      "px-[var(--space-4)] h-11 text-left whitespace-nowrap",
                       "text-[length:var(--text-xs)] font-semibold uppercase tracking-[var(--tracking-wider)]",
                       "text-[hsl(var(--color-neutral-500))]"
                     )}
@@ -217,7 +217,7 @@ export function DataTable<T extends Record<string, any>>({
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className="px-[var(--space-4)] h-[52px] text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-700))]"
+                      className="px-[var(--space-4)] h-[52px] text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-700))] whitespace-nowrap"
                     >
                       {column.render ? column.render(item) : item[column.key]}
                     </td>
@@ -230,8 +230,8 @@ export function DataTable<T extends Record<string, any>>({
       </div>
 
       {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between h-12">
-          <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-[var(--space-3)] py-[var(--space-2)]">
+          <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] text-center sm:text-left">
             {pagination.total
               ? `Mostrando ${((pagination.currentPage - 1) * pagination.pageSize) + 1} - ${Math.min(pagination.currentPage * pagination.pageSize, pagination.total)} de ${pagination.total}`
               : `Página ${pagination.currentPage} de ${pagination.totalPages}`

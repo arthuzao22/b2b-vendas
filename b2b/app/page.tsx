@@ -23,7 +23,7 @@ export default function Home() {
       <Header />
 
       {/* ═══ HERO ═══ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--color-brand-50))] via-[hsl(var(--color-neutral-0))] to-[hsl(var(--color-neutral-25))] py-[var(--space-24)] px-[var(--space-4)]">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--color-brand-50))] via-[hsl(var(--color-neutral-0))] to-[hsl(var(--color-neutral-25))] py-[var(--space-12)] sm:py-[var(--space-16)] lg:py-[var(--space-24)] px-[var(--space-4)]">
         {/* Decorative grid */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, hsl(var(--color-brand-500)) 1px, transparent 1px)', backgroundSize: '24px 24px' }} aria-hidden="true" />
 
@@ -60,7 +60,7 @@ export default function Home() {
               </div>
 
               {/* Stats */}
-              <div className="flex items-center gap-[var(--space-10)] pt-[var(--space-6)]">
+              <div className="flex flex-wrap items-center gap-[var(--space-6)] sm:gap-[var(--space-10)] pt-[var(--space-6)]">
                 {[
                   { value: "500+", label: "Empresas ativas" },
                   { value: "10K+", label: "Produtos" },
@@ -109,9 +109,9 @@ export default function Home() {
       </section>
 
       {/* ═══ FEATURES ═══ */}
-      <section className="py-[var(--space-24)] px-[var(--space-4)]">
+      <section className="py-[var(--space-12)] sm:py-[var(--space-16)] lg:py-[var(--space-24)] px-[var(--space-4)]">
         <Container>
-          <div className="text-center mb-[var(--space-16)]">
+          <div className="text-center mb-[var(--space-10)] lg:mb-[var(--space-16)]">
             <h2 className="text-[length:var(--text-3xl)] md:text-[length:var(--text-4xl)] font-bold mb-[var(--space-4)] text-[hsl(var(--color-neutral-900))]">
               Por que escolher nossa plataforma?
             </h2>
@@ -120,7 +120,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-[var(--space-6)]">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-[var(--space-4)] sm:gap-[var(--space-6)]">
             {[
               { icon: Package, title: "Gestão de Catálogo", desc: "Organize e gerencie seus produtos com facilidade. Upload em massa, categorização e controle de estoque integrado." },
               { icon: BarChart3, title: "Relatórios Detalhados", desc: "Acompanhe suas vendas, produtos mais vendidos e performance com dashboards intuitivos e relatórios completos." },
@@ -148,9 +148,9 @@ export default function Home() {
       </section>
 
       {/* ═══ HOW IT WORKS ═══ */}
-      <section className="py-[var(--space-24)] px-[var(--space-4)] bg-[hsl(var(--color-neutral-25))]">
+      <section className="py-[var(--space-12)] sm:py-[var(--space-16)] lg:py-[var(--space-24)] px-[var(--space-4)] bg-[hsl(var(--color-neutral-25))]">
         <Container>
-          <div className="text-center mb-[var(--space-16)]">
+          <div className="text-center mb-[var(--space-10)] lg:mb-[var(--space-16)]">
             <h2 className="text-[length:var(--text-3xl)] md:text-[length:var(--text-4xl)] font-bold mb-[var(--space-4)] text-[hsl(var(--color-neutral-900))]">
               Como funciona
             </h2>
@@ -236,9 +236,9 @@ export default function Home() {
       </section>
 
       {/* ═══ CTA ═══ */}
-      <section className="py-[var(--space-24)] px-[var(--space-4)]">
+      <section className="py-[var(--space-12)] sm:py-[var(--space-16)] lg:py-[var(--space-24)] px-[var(--space-4)]">
         <Container>
-          <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-gradient-to-br from-[hsl(var(--color-brand-500))] to-[hsl(var(--color-brand-700))] p-[var(--space-16)] text-center">
+          <div className="relative overflow-hidden rounded-[var(--radius-xl)] bg-gradient-to-br from-[hsl(var(--color-brand-500))] to-[hsl(var(--color-brand-700))] p-[var(--space-8)] sm:p-[var(--space-12)] lg:p-[var(--space-16)] text-center">
             {/* Decorative circles */}
             <div className="absolute -top-20 -right-20 size-60 rounded-full bg-white/10 blur-2xl" aria-hidden="true" />
             <div className="absolute -bottom-16 -left-16 size-48 rounded-full bg-white/5 blur-xl" aria-hidden="true" />

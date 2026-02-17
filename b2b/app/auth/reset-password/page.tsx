@@ -79,16 +79,16 @@ function ResetPasswordForm() {
   return (
     <Card>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Redefinir senha</CardTitle>
-        <CardDescription className="text-center">
+        <CardTitle className="text-[length:var(--text-2xl)] font-bold text-center text-[hsl(var(--color-neutral-900))]">Redefinir senha</CardTitle>
+        <CardDescription className="text-center text-[hsl(var(--color-neutral-500))]">
           Digite sua nova senha
         </CardDescription>
       </CardHeader>
       <CardContent>
         {success ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 p-3 text-sm text-green-800 bg-green-50 border border-green-200 rounded-md">
-              <CheckCircle className="h-4 w-4" />
+            <div className="flex items-center gap-[var(--space-2)] p-[var(--space-3)] text-[length:var(--text-sm)] text-[hsl(var(--color-success-700))] bg-[hsl(var(--color-success-50))] border border-[hsl(var(--color-success-200))] rounded-[var(--radius-md)]">
+              <CheckCircle className="h-4 w-4 shrink-0" />
               <span>
                 Senha redefinida com sucesso! Redirecionando para o login...
               </span>
@@ -97,8 +97,8 @@ function ResetPasswordForm() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="flex items-center gap-2 p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-md">
-                <AlertCircle className="h-4 w-4" />
+              <div className="flex items-center gap-[var(--space-2)] p-[var(--space-3)] text-[length:var(--text-sm)] text-[hsl(var(--color-error-700))] bg-[hsl(var(--color-error-50))] border border-[hsl(var(--color-error-200))] rounded-[var(--radius-md)]">
+                <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
@@ -164,10 +164,10 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--color-neutral-25))] px-[var(--space-4)] py-[var(--space-12)]">
       <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
+        <div className="flex justify-center mb-[var(--space-8)]">
+          <Link href="/" className="flex items-center gap-[var(--space-2)] text-[length:var(--text-2xl)] font-bold text-primary">
             <ShoppingBag className="h-8 w-8" />
             <span>B2B Marketplace</span>
           </Link>
@@ -177,8 +177,8 @@ export default function ResetPasswordPage() {
           <ResetPasswordForm />
         </Suspense>
 
-        <div className="mt-6 text-center">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-primary">
+        <div className="mt-[var(--space-6)] text-center">
+          <Link href="/" className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] hover:text-primary">
             ← Voltar para página inicial
           </Link>
         </div>

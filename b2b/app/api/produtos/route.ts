@@ -124,10 +124,10 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    logger.info("Produto criado", { 
-      produtoId: produto.id, 
+    logger.info("Produto criado", {
+      produtoId: produto.id,
       fornecedorId,
-      sku: produto.sku 
+      sku: produto.sku
     });
 
     // Converter Decimal para string para serialização JSON
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     const page = parseInt(searchParams.get("page") || "1");
     const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
     const skip = (page - 1) * limit;
@@ -199,6 +199,7 @@ export async function GET(request: NextRequest) {
           fornecedor: {
             select: {
               id: true,
+              slug: true,
               nomeFantasia: true,
               razaoSocial: true,
               cnpj: true,

@@ -1,9 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/api-helpers";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { DashboardCharts } from "@/components/charts/dashboard-charts";
 import { Users, ShoppingBag, Package, TrendingUp, Building2, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 interface AdminKPIs {
   totalUsuarios: number;
@@ -114,115 +117,129 @@ export default async function AdminDashboard() {
   ]);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard do Administrador</h1>
-        <p className="text-muted-foreground">
-          Visão geral do marketplace
-        </p>
-      </div>
+    <div className="space-y-[var(--space-6)] md:space-y-[var(--space-8)]">
+      <PageHeader
+        title="Dashboard do Administrador"
+        subtitle="Visão geral do marketplace"
+      />
 
       {/* KPI Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-[var(--space-4)] sm:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Usuários</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+            <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">Total de Usuários</CardTitle>
+            <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-neutral-50))]">
+              <Users className="size-4 text-[hsl(var(--color-brand-500))]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.totalUsuarios}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{kpis.totalUsuarios}</div>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
               Cadastrados na plataforma
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Fornecedores</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+            <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">Fornecedores</CardTitle>
+            <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-neutral-50))]">
+              <Building2 className="size-4 text-[hsl(var(--color-info-500))]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.totalFornecedores}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{kpis.totalFornecedores}</div>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
               {kpis.fornecedoresPendentes} aguardando aprovação
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Clientes</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+            <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">Clientes</CardTitle>
+            <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-neutral-50))]">
+              <Users className="size-4 text-[hsl(var(--color-success-500))]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.totalClientes}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{kpis.totalClientes}</div>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
               Clientes ativos
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produtos Ativos</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+            <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">Produtos Ativos</CardTitle>
+            <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-neutral-50))]">
+              <Package className="size-4 text-[hsl(var(--color-neutral-600))]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.produtosAtivos}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{kpis.produtosAtivos}</div>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
               No marketplace
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Pedidos</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+            <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">Total de Pedidos</CardTitle>
+            <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-neutral-50))]">
+              <ShoppingBag className="size-4 text-[hsl(var(--color-brand-500))]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.totalPedidos}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{kpis.totalPedidos}</div>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
               {kpis.pedidosPendentes} pendentes
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Faturamento Total</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+            <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">Faturamento Total</CardTitle>
+            <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-neutral-50))]">
+              <TrendingUp className="size-4 text-[hsl(var(--color-success-500))]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(kpis.faturamentoTotal)}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{formatCurrency(kpis.faturamentoTotal)}</div>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
               Receita do marketplace
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aprovações Pendentes</CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-500" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+            <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">Aprovações Pendentes</CardTitle>
+            <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-warning-50))]">
+              <AlertCircle className="size-4 text-[hsl(var(--color-warning-500))]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.fornecedoresPendentes}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{kpis.fornecedoresPendentes}</div>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
               Fornecedores aguardando
             </p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pedidos Pendentes</CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-500" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-[var(--space-2)]">
+            <CardTitle className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-500))]">Pedidos Pendentes</CardTitle>
+            <div className="flex items-center justify-center size-9 rounded-[var(--radius-md)] bg-[hsl(var(--color-warning-50))]">
+              <AlertCircle className="size-4 text-[hsl(var(--color-warning-500))]" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpis.pedidosPendentes}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))]">{kpis.pedidosPendentes}</div>
+            <p className="text-[length:var(--text-xs)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-0-5)]">
               Necessitam atenção
             </p>
           </CardContent>
@@ -230,20 +247,18 @@ export default async function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-[var(--space-4)] sm:grid-cols-2 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Gerenciar Usuários</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] mb-[var(--space-4)]">
               Visualize e gerencie todos os usuários da plataforma
             </p>
-            <a href="/dashboard/admin/usuarios">
-              <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                Ver Usuários
-              </button>
-            </a>
+            <Button className="w-full" asChild>
+              <Link href="/dashboard/admin/usuarios">Ver Usuários</Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -252,14 +267,12 @@ export default async function AdminDashboard() {
             <CardTitle>Gerenciar Fornecedores</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] mb-[var(--space-4)]">
               Aprove ou gerencie fornecedores cadastrados
             </p>
-            <a href="/dashboard/admin/fornecedores">
-              <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                Ver Fornecedores
-              </button>
-            </a>
+            <Button className="w-full" asChild>
+              <Link href="/dashboard/admin/fornecedores">Ver Fornecedores</Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -268,20 +281,18 @@ export default async function AdminDashboard() {
             <CardTitle>Relatórios</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] mb-[var(--space-4)]">
               Acesse relatórios consolidados do marketplace
             </p>
-            <a href="/dashboard/admin/relatorios">
-              <button className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-                Ver Relatórios
-              </button>
-            </a>
+            <Button className="w-full" asChild>
+              <Link href="/dashboard/admin/relatorios">Ver Relatórios</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts Section */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-[var(--space-4)] md:grid-cols-2">
         <DashboardCharts 
           ordersByMonth={chartData.ordersByMonth}
           ordersByStatus={chartData.ordersByStatus}

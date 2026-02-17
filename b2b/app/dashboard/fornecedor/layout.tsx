@@ -30,7 +30,7 @@ export default async function FornecedorLayout({
       
       {/* Main content area with sidebar offset */}
       <main className="lg:pl-64">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           {children}
         </div>
       </main>

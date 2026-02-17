@@ -35,10 +35,10 @@ export default async function PedidosPage() {
 
   if (pedidos.length === 0) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-[var(--space-6)] md:space-y-[var(--space-8)]">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Meus Pedidos</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">Meus Pedidos</h1>
+          <p className="text-[length:var(--text-sm)] md:text-[length:var(--text-base)] text-[hsl(var(--color-neutral-500))]">
             Acompanhe todos os seus pedidos
           </p>
         </div>
@@ -61,24 +61,24 @@ export default async function PedidosPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-[var(--space-6)] md:space-y-[var(--space-8)]">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Meus Pedidos</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">Meus Pedidos</h1>
+          <p className="text-[length:var(--text-sm)] md:text-[length:var(--text-base)] text-[hsl(var(--color-neutral-500))]">
             {pedidos.length} {pedidos.length === 1 ? "pedido encontrado" : "pedidos encontrados"}
           </p>
         </div>
         <OrderSearch className="max-w-sm" />
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {pedidos.map((pedido) => (
           <Card key={pedido.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
+            <CardHeader className="p-4 sm:p-6 pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                 <div className="space-y-1">
-                  <CardTitle className="text-lg">{pedido.numeroPedido}</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">{pedido.numeroPedido}</CardTitle>
                   <p className="text-sm text-muted-foreground">
                     {pedido.fornecedor.nomeFantasia || pedido.fornecedor.razaoSocial}
                   </p>
@@ -89,16 +89,16 @@ export default async function PedidosPage() {
                 <StatusBadge status={pedido.status} />
               </div>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
+            <CardContent className="p-4 sm:p-6 pt-0">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
                     {pedido.itens.length} {pedido.itens.length === 1 ? "item" : "itens"}
                   </p>
-                  <p className="text-2xl font-bold">{formatCurrency(Number(pedido.total))}</p>
+                  <p className="text-xl sm:text-2xl font-bold">{formatCurrency(Number(pedido.total))}</p>
                 </div>
-                <Link href={`/pedidos/${pedido.id}`}>
-                  <Button variant="outline">Ver Detalhes</Button>
+                <Link href={`/pedidos/${pedido.id}`} className="self-start sm:self-auto">
+                  <Button variant="outline" className="w-full sm:w-auto">Ver Detalhes</Button>
                 </Link>
               </div>
             </CardContent>

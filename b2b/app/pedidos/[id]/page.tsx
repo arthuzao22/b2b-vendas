@@ -69,7 +69,7 @@ export default async function PedidoDetailPage({
   const pedido = await getPedido(id, clienteId);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-[var(--space-6)] md:space-y-[var(--space-8)]">
       <div className="flex items-center gap-4">
         <Link href="/pedidos">
           <Button variant="ghost" size="sm">
@@ -79,14 +79,14 @@ export default async function PedidoDetailPage({
         </Link>
       </div>
 
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{pedido.numeroPedido}</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">{pedido.numeroPedido}</h1>
+          <p className="text-[length:var(--text-sm)] md:text-[length:var(--text-base)] text-[hsl(var(--color-neutral-500))]">
             Pedido realizado em {formatDate(pedido.criadoEm)}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <StatusBadge status={pedido.status} />
           <CancelOrderButton pedidoId={pedido.id} status={pedido.status} />
           <Link href={`/pedidos/${pedido.id}/rastreio`}>
@@ -98,8 +98,8 @@ export default async function PedidoDetailPage({
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Order Items */}
           <Card>
             <CardHeader>
@@ -109,10 +109,10 @@ export default async function PedidoDetailPage({
               {pedido.itens.map((item) => (
                 <div
                   key={item.id}
-                  className="flex justify-between items-center border-b pb-4 last:border-0"
+                  className="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b pb-4 last:border-0 gap-2"
                 >
-                  <div className="flex-1">
-                    <h4 className="font-medium">{item.produto.nome}</h4>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium truncate">{item.produto.nome}</h4>
                     <p className="text-sm text-muted-foreground">
                       SKU: {item.produto.sku}
                     </p>
@@ -199,7 +199,7 @@ export default async function PedidoDetailPage({
           )}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Order Summary */}
           <Card>
             <CardHeader>

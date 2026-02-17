@@ -30,6 +30,15 @@ export async function POST(request: NextRequest) {
 
     const { fornecedorId, items, enderecoEntrega, cidadeEntrega, estadoEntrega, cepEntrega, observacoes } = validatedData;
 
+    // Verificar se o cliente existe no banco
+    const clienteExists = await prisma.cliente.findUnique({
+      where: { id: clienteId },
+    });
+
+    if (!clienteExists) {
+      return errorResponse("Cliente não encontrado. Faça login novamente.", 404);
+    }
+
     // Verificar se fornecedor existe
     const fornecedor = await prisma.fornecedor.findUnique({
       where: { id: fornecedorId },

@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Container } from "@/components/layout/container";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -43,10 +44,10 @@ export default async function FornecedoresPage() {
 
   if (fornecedores.length === 0) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight">Fornecedores</h1>
-          <p className="text-muted-foreground">
+      <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
+        <div className="mb-[var(--space-6)] md:mb-[var(--space-8)]">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">Fornecedores</h1>
+          <p className="text-[length:var(--text-sm)] md:text-[length:var(--text-base)] text-[hsl(var(--color-neutral-500))]">
             Conheça os fornecedores parceiros
           </p>
         </div>
@@ -55,42 +56,44 @@ export default async function FornecedoresPage() {
           title="Nenhum fornecedor disponível"
           description="Em breve teremos fornecedores cadastrados"
         />
-      </div>
+      </Container>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Fornecedores</h1>
-        <p className="text-muted-foreground">
+    <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
+      <div className="mb-[var(--space-6)] md:mb-[var(--space-8)]">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">Fornecedores</h1>
+        <p className="text-[length:var(--text-sm)] md:text-[length:var(--text-base)] text-[hsl(var(--color-neutral-500))]">
           {fornecedores.length} {fornecedores.length === 1 ? "fornecedor disponível" : "fornecedores disponíveis"}
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {fornecedores.map((fornecedor) => (
           <Link key={fornecedor.id} href={`/fornecedor/${fornecedor.slug}`}>
             <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
               {/* Banner */}
-              <div className="relative h-32 bg-gradient-to-r from-blue-500 to-blue-600">
+              <div className="relative h-28 sm:h-32 bg-gradient-to-r from-[hsl(var(--color-brand-500))] to-[hsl(var(--color-brand-600))]">
                 {fornecedor.banner ? (
                   <Image
                     src={fornecedor.banner}
                     alt={fornecedor.nomeFantasia || fornecedor.razaoSocial}
                     fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="object-cover"
                   />
                 ) : null}
                 
                 {/* Logo */}
-                <div className="absolute -bottom-10 left-4">
-                  <div className="relative h-20 w-20 rounded-lg border-4 border-white bg-white shadow-lg overflow-hidden">
+                <div className="absolute -bottom-8 sm:-bottom-10 left-4">
+                  <div className="relative h-16 w-16 sm:h-20 sm:w-20 rounded-lg border-4 border-white bg-white shadow-lg overflow-hidden">
                     {fornecedor.logo ? (
                       <Image
                         src={fornecedor.logo}
                         alt={fornecedor.nomeFantasia || fornecedor.razaoSocial}
                         fill
+                        sizes="80px"
                         className="object-cover"
                       />
                     ) : (
@@ -102,7 +105,7 @@ export default async function FornecedoresPage() {
                 </div>
               </div>
 
-              <CardContent className="pt-14 space-y-4">
+              <CardContent className="pt-10 sm:pt-14 space-y-3 sm:space-y-4">
                 <div>
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-bold text-lg line-clamp-1">
@@ -150,6 +153,6 @@ export default async function FornecedoresPage() {
           </Link>
         ))}
       </div>
-    </div>
+    </Container>
   );
 }

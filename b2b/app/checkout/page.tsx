@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -90,7 +91,7 @@ function CheckoutContent() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto py-8">
+      <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
         <EmptyState
           icon={ShoppingCart}
           title="Seu carrinho está vazio"
@@ -101,23 +102,23 @@ function CheckoutContent() {
             </Link>
           }
         />
-      </div>
+      </Container>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Finalizar Compra</h1>
-        <p className="text-muted-foreground">
+    <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
+      <div className="mb-[var(--space-6)] md:mb-[var(--space-8)]">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">Finalizar Compra</h1>
+        <p className="text-[length:var(--text-sm)] md:text-[length:var(--text-base)] text-[hsl(var(--color-neutral-500))]">
           Revise seu pedido e confirme a compra
         </p>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-[var(--space-6)] lg:gap-[var(--space-8)] lg:grid-cols-3">
           {/* Order Details */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-[var(--space-4)] md:space-y-[var(--space-6)]">
             {/* Order Items */}
             <Card>
               <CardHeader>
@@ -232,13 +233,13 @@ function CheckoutContent() {
           </div>
         </div>
       </form>
-    </div>
+    </Container>
   );
 }
 
 export default function CheckoutPage() {
   return (
-    <Suspense fallback={<div className="container mx-auto py-8"><LoadingSkeleton className="h-96 w-full" /></div>}>
+    <Suspense fallback={<Container className="py-[var(--space-6)] md:py-[var(--space-10)]"><LoadingSkeleton className="h-96 w-full" /></Container>}>
       <CheckoutContent />
     </Suspense>
   );

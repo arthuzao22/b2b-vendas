@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PriceDisplay } from "@/components/ui/price-display";
@@ -141,17 +142,17 @@ export default function CatalogoPage() {
 
   if (status === "loading" || loading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="mb-8">
-          <LoadingSkeleton className="h-8 w-64 mb-2" />
-          <LoadingSkeleton className="h-4 w-96" />
+      <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
+        <div className="mb-[var(--space-6)] md:mb-[var(--space-8)]">
+          <LoadingSkeleton className="h-8 w-48 sm:w-64 mb-2" />
+          <LoadingSkeleton className="h-4 w-64 sm:w-96" />
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
         </div>
-      </div>
+      </Container>
     );
   }
 
@@ -160,15 +161,15 @@ export default function CatalogoPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Catálogo de Produtos</h1>
-        <p className="text-muted-foreground">
+    <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
+      <div className="mb-[var(--space-6)] md:mb-[var(--space-8)]">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">Catálogo de Produtos</h1>
+        <p className="text-[length:var(--text-sm)] md:text-[length:var(--text-base)] text-[hsl(var(--color-neutral-500))]">
           Explore e adicione produtos ao seu carrinho
         </p>
       </div>
 
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
+      <div className="mb-[var(--space-4)] md:mb-[var(--space-6)] flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -220,24 +221,25 @@ export default function CatalogoPage() {
         />
       ) : (
         <>
-          <p className="mb-6 text-sm text-muted-foreground">
+          <p className="mb-[var(--space-4)] md:mb-[var(--space-6)] text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
             {filteredProdutos.length}{" "}
             {filteredProdutos.length === 1 ? "produto encontrado" : "produtos encontrados"}
           </p>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredProdutos.map((produto) => (
               <Card
                 key={produto.id}
                 className="overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col"
               >
                 <Link href={`/fornecedor/${produto.fornecedor.slug}`}>
-                  <div className="relative h-48 w-full bg-gray-100">
+                  <div className="relative h-40 sm:h-48 w-full bg-[hsl(var(--color-neutral-50))]">
                     {produto.imagens[0] ? (
                       <Image
                         src={produto.imagens[0]}
                         alt={produto.nome}
                         fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                         className="object-cover"
                       />
                     ) : (
@@ -307,6 +309,6 @@ export default function CatalogoPage() {
           </div>
         </>
       )}
-    </div>
+    </Container>
   );
 }

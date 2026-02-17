@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useCart } from "@/hooks/useCart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Container } from "@/components/layout/container";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PriceDisplay } from "@/components/ui/price-display";
@@ -25,7 +26,7 @@ function CarrinhoContent() {
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto py-[var(--space-10)]">
+      <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
         <EmptyState
           icon={ShoppingCart}
           title="Seu carrinho está vazio"
@@ -35,14 +36,14 @@ function CarrinhoContent() {
             onClick: () => router.push("/dashboard/cliente/catalogo"),
           }}
         />
-      </div>
+      </Container>
     );
   }
 
   return (
-    <div className="container mx-auto py-[var(--space-10)] px-[var(--space-4)]">
-      <div className="mb-[var(--space-8)]">
-        <h1 className="text-[length:var(--text-3xl)] font-bold tracking-[var(--tracking-tight)] text-[hsl(var(--color-neutral-900))]">
+    <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
+      <div className="mb-[var(--space-6)] md:mb-[var(--space-8)]">
+        <h1 className="text-2xl md:text-[length:var(--text-3xl)] font-bold tracking-[var(--tracking-tight)] text-[hsl(var(--color-neutral-900))]">
           Carrinho de Compras
         </h1>
         <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] mt-[var(--space-1)]">
@@ -50,20 +51,21 @@ function CarrinhoContent() {
         </p>
       </div>
 
-      <div className="grid gap-[var(--space-8)] lg:grid-cols-3">
+      <div className="grid gap-[var(--space-6)] lg:gap-[var(--space-8)] lg:grid-cols-3">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-[var(--space-4)]">
           {items.map((item) => (
             <Card key={item.id}>
-              <CardContent className="p-[var(--space-6)]">
-                <div className="flex gap-[var(--space-4)]">
+              <CardContent className="p-[var(--space-4)] sm:p-[var(--space-6)]">
+                <div className="flex gap-[var(--space-3)] sm:gap-[var(--space-4)]">
                   {/* Product Image */}
-                  <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--color-neutral-200))]">
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex-shrink-0 overflow-hidden rounded-[var(--radius-lg)] border border-[hsl(var(--color-neutral-200))]">
                     {item.imagemUrl ? (
                       <Image
                         src={item.imagemUrl}
                         alt={item.nome}
                         fill
+                        sizes="96px"
                         className="object-cover"
                       />
                     ) : (
@@ -76,7 +78,7 @@ function CarrinhoContent() {
                   {/* Product Details */}
                   <div className="flex flex-1 flex-col justify-between">
                     <div>
-                      <div className="flex justify-between">
+                      <div className="flex flex-col sm:flex-row sm:justify-between gap-1">
                         <div>
                           <h3 className="font-semibold text-[hsl(var(--color-neutral-800))]">{item.nome}</h3>
                           <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
@@ -90,7 +92,7 @@ function CarrinhoContent() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-[var(--space-3)]">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-[var(--space-3)] mt-[var(--space-3)]">
                       <QuantitySelector
                         value={item.quantidade}
                         onChange={(qty) => updateItemQuantity(item.id, qty)}
@@ -169,13 +171,13 @@ function CarrinhoContent() {
           </Card>
         </div>
       </div>
-    </div>
+    </Container>
   );
 }
 
 export default function CarrinhoPage() {
   return (
-    <Suspense fallback={<div className="container mx-auto py-[var(--space-10)]"><Skeleton className="h-96 w-full" /></div>}>
+    <Suspense fallback={<Container className="py-[var(--space-6)] md:py-[var(--space-10)]"><Skeleton className="h-96 w-full" /></Container>}>
       <CarrinhoContent />
     </Suspense>
   );

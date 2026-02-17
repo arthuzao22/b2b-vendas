@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
+import { Container } from "@/components/layout/container";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -48,30 +49,32 @@ export default async function FornecedorPage({
   const fornecedor = await getFornecedor(slug);
 
   return (
-    <div className="container mx-auto py-8">
+    <Container className="py-[var(--space-6)] md:py-[var(--space-10)]">
       {/* Supplier Header */}
-      <Card className="mb-8 overflow-hidden">
+      <Card className="mb-[var(--space-6)] md:mb-[var(--space-8)] overflow-hidden">
         {/* Banner */}
-        <div className="relative h-48 bg-gradient-to-r from-blue-500 to-blue-600">
+        <div className="relative h-32 sm:h-40 md:h-48 bg-gradient-to-r from-[hsl(var(--color-brand-500))] to-[hsl(var(--color-brand-600))]">
           {fornecedor.banner && (
             <Image
               src={fornecedor.banner}
               alt={fornecedor.nomeFantasia || fornecedor.razaoSocial}
               fill
+              sizes="100vw"
               className="object-cover"
             />
           )}
         </div>
 
         <CardContent className="pt-0">
-          <div className="flex flex-col md:flex-row gap-6 -mt-16 md:-mt-12">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-6 -mt-12 md:-mt-12">
             {/* Logo */}
-            <div className="relative h-32 w-32 rounded-lg border-4 border-white bg-white shadow-lg overflow-hidden flex-shrink-0">
+            <div className="relative h-24 w-24 sm:h-32 sm:w-32 rounded-lg border-4 border-white bg-white shadow-lg overflow-hidden flex-shrink-0">
               {fornecedor.logo ? (
                 <Image
                   src={fornecedor.logo}
                   alt={fornecedor.nomeFantasia || fornecedor.razaoSocial}
                   fill
+                  sizes="128px"
                   className="object-cover"
                 />
               ) : (
@@ -82,11 +85,11 @@ export default async function FornecedorPage({
             </div>
 
             {/* Info */}
-            <div className="flex-1 pt-4">
-              <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex-1 pt-2 md:pt-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 mb-4">
                 <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-3xl font-bold tracking-tight">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
                       {fornecedor.nomeFantasia || fornecedor.razaoSocial}
                     </h1>
                     {fornecedor.verificado && (
@@ -109,7 +112,7 @@ export default async function FornecedorPage({
                 </div>
               </div>
 
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {(fornecedor.cidade || fornecedor.estado) && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="h-4 w-4" />
@@ -140,8 +143,8 @@ export default async function FornecedorPage({
 
       {/* Products Section */}
       <div className="mb-4">
-        <h2 className="text-2xl font-bold tracking-tight">Produtos</h2>
-        <p className="text-muted-foreground">
+        <h2 className="text-xl md:text-2xl font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">Produtos</h2>
+        <p className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
           {fornecedor.produtos.length}{" "}
           {fornecedor.produtos.length === 1 ? "produto disponível" : "produtos disponíveis"}
         </p>
@@ -154,16 +157,17 @@ export default async function FornecedorPage({
           description="Este fornecedor ainda não possui produtos cadastrados"
         />
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {fornecedor.produtos.map((produto) => (
             <Link key={produto.id} href={`/fornecedor/${fornecedor.slug}/produto/${produto.slug}`}>
               <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="relative h-48 w-full bg-gray-100">
+                <div className="relative h-40 sm:h-48 w-full bg-[hsl(var(--color-neutral-50))]">
                   {produto.imagens[0] ? (
                     <Image
                       src={produto.imagens[0]}
                       alt={produto.nome}
                       fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       className="object-cover"
                     />
                   ) : (
@@ -201,6 +205,6 @@ export default async function FornecedorPage({
           ))}
         </div>
       )}
-    </div>
+    </Container>
   );
 }

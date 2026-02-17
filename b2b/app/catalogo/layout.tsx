@@ -1,5 +1,16 @@
-import { ReactNode } from "react";
+import Header from "@/components/header"
+import Footer from "@/components/footer"
 
-export default function CatalogoLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+export default function CatalogoLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <>
+      <Header />
+      <main className="min-h-screen">{children}</main>
+      <Footer />
+    </>
+  )
 }

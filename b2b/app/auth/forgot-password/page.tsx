@@ -43,10 +43,10 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--color-neutral-25))] px-[var(--space-4)] py-[var(--space-12)]">
       <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
+        <div className="flex justify-center mb-[var(--space-8)]">
+          <Link href="/" className="flex items-center gap-[var(--space-2)] text-[length:var(--text-2xl)] font-bold text-primary">
             <ShoppingBag className="h-8 w-8" />
             <span>B2B Marketplace</span>
           </Link>
@@ -54,16 +54,16 @@ export default function ForgotPasswordPage() {
 
         <Card>
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Esqueceu sua senha?</CardTitle>
-            <CardDescription className="text-center">
+            <CardTitle className="text-[length:var(--text-2xl)] font-bold text-center text-[hsl(var(--color-neutral-900))]">Esqueceu sua senha?</CardTitle>
+            <CardDescription className="text-center text-[hsl(var(--color-neutral-500))]">
               Digite seu email e enviaremos instruções para redefinir sua senha
             </CardDescription>
           </CardHeader>
           <CardContent>
             {success ? (
               <div className="space-y-4">
-                <div className="flex items-center gap-2 p-3 text-sm text-green-800 bg-green-50 border border-green-200 rounded-md">
-                  <CheckCircle className="h-4 w-4" />
+                <div className="flex items-center gap-[var(--space-2)] p-[var(--space-3)] text-[length:var(--text-sm)] text-[hsl(var(--color-success-700))] bg-[hsl(var(--color-success-50))] border border-[hsl(var(--color-success-200))] rounded-[var(--radius-md)]">
+                  <CheckCircle className="h-4 w-4 shrink-0" />
                   <span>
                     Email enviado! Verifique sua caixa de entrada e siga as instruções.
                   </span>
@@ -75,14 +75,14 @@ export default function ForgotPasswordPage() {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
                 {error && (
-                  <div className="flex items-center gap-2 p-3 text-sm text-red-800 bg-red-50 border border-red-200 rounded-md">
-                    <AlertCircle className="h-4 w-4" />
+                  <div className="flex items-center gap-[var(--space-2)] p-[var(--space-3)] text-[length:var(--text-sm)] text-[hsl(var(--color-error-700))] bg-[hsl(var(--color-error-50))] border border-[hsl(var(--color-error-200))] rounded-[var(--radius-md)]">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
                     <span>{error}</span>
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium">
+                <div className="space-y-[var(--space-2)]">
+                  <label htmlFor="email" className="text-[length:var(--text-sm)] font-medium text-[hsl(var(--color-neutral-700))]">
                     Email
                   </label>
                   <Input
@@ -110,8 +110,8 @@ export default function ForgotPasswordPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-6 text-center">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-primary">
+        <div className="mt-[var(--space-6)] text-center">
+          <Link href="/" className="text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))] hover:text-primary">
             ← Voltar para página inicial
           </Link>
         </div>

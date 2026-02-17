@@ -43,10 +43,10 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--color-neutral-25))] px-[var(--space-4)] py-[var(--space-12)]">
       <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
-          <Link href="/" className="flex items-center gap-2 text-2xl font-bold text-primary">
+        <div className="flex justify-center mb-[var(--space-8)]">
+          <Link href="/" className="flex items-center gap-[var(--space-2)] text-[length:var(--text-2xl)] font-bold text-primary">
             <ShoppingBag className="h-8 w-8" />
             <span>B2B Marketplace</span>
           </Link>
@@ -54,13 +54,13 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
 
         <Card>
           <CardHeader className="space-y-1">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 bg-red-50 rounded-full">
-                <AlertCircle className="h-8 w-8 text-red-600" />
+            <div className="flex justify-center mb-[var(--space-4)]">
+              <div className="p-[var(--space-3)] bg-[hsl(var(--color-error-50))] rounded-full">
+                <AlertCircle className="h-8 w-8 text-[hsl(var(--color-error-500))]" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-center">Erro de Autenticação</CardTitle>
-            <CardDescription className="text-center">
+            <CardTitle className="text-[length:var(--text-2xl)] font-bold text-center text-[hsl(var(--color-neutral-900))]">Erro de Autenticação</CardTitle>
+            <CardDescription className="text-center text-[hsl(var(--color-neutral-500))]">
               {getErrorMessage(error)}
             </CardDescription>
           </CardHeader>
@@ -73,7 +73,7 @@ export default async function ErrorPage({ searchParams }: ErrorPageProps) {
               <Link href="/">Voltar para página inicial</Link>
             </Button>
 
-            <div className="text-center text-sm text-muted-foreground">
+            <div className="text-center text-[length:var(--text-sm)] text-[hsl(var(--color-neutral-500))]">
               Precisa de ajuda?{" "}
               <Link href="/contato" className="text-primary hover:underline font-medium">
                 Entre em contato
