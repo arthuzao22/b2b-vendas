@@ -23,6 +23,10 @@ interface Pedido {
   cliente: {
     razaoSocial: string
     cnpj: string
+    usuario: {
+      nome: string
+      email: string
+    }
   }
 }
 
@@ -83,7 +87,7 @@ export default function PedidosPage() {
         limit: perPage.toString(),
         ...(statusFilter !== "todos" && { status: statusFilter }),
       })
-      
+
       const response = await fetch(`/api/pedidos?${params}`)
       const data = await response.json()
 
@@ -226,9 +230,9 @@ export default function PedidosPage() {
                       </td>
                       <td className="p-4">
                         <div className="space-y-1">
-                          <p className="font-medium">{pedido.cliente.razaoSocial}</p>
+                          <p className="font-medium">{pedido.cliente.razaoSocial || pedido.cliente.usuario?.nome}</p>
                           <p className="text-sm text-muted-foreground">
-                            CNPJ: {pedido.cliente.cnpj}
+                            {pedido.cliente.cnpj ? `CNPJ: ${pedido.cliente.cnpj}` : pedido.cliente.usuario?.email}
                           </p>
                         </div>
                       </td>
@@ -256,9 +260,9 @@ export default function PedidosPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             title="Ver detalhes"
                             onClick={() => handleViewPedido(pedido.id)}
                           >

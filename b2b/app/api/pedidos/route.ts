@@ -99,17 +99,17 @@ export async function POST(request: NextRequest) {
     // Buscar itens da lista de preço
     const itensListaPreco = clienteFornecedor?.listaPrecoId
       ? await prisma.itemListaPreco.findMany({
-          where: {
-            listaPrecoId: clienteFornecedor.listaPrecoId,
-            produtoId: { in: produtoIds },
-          },
-        })
+        where: {
+          listaPrecoId: clienteFornecedor.listaPrecoId,
+          produtoId: { in: produtoIds },
+        },
+      })
       : [];
 
     // Calcular preço para cada item
     const itemsComPreco = items.map(item => {
       const produto = produtos.find(p => p.id === item.produtoId)!;
-      
+
       let precoUnitario = produto.precoBase;
 
       // Verificar preço customizado
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
           } else {
             precoUnitario = produto.precoBase.sub(lista.valorDesconto);
           }
-          
+
           if (precoUnitario.lessThan(0)) {
             precoUnitario = new Decimal(0);
           }
@@ -345,7 +345,9 @@ export async function GET(request: NextRequest) {
         orderBy: { criadoEm: "desc" },
         include: {
           cliente: {
-            include: {
+            select: {
+              razaoSocial: true,
+              cnpj: true,
               usuario: {
                 select: {
                   nome: true,

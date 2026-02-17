@@ -35,6 +35,7 @@ function CheckoutContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          fornecedorId,
           items: items.map(item => ({
             produtoId: item.id,
             quantidade: item.quantidade,
@@ -47,7 +48,7 @@ function CheckoutContent() {
       }
 
       const validationData = await validateResponse.json();
-      
+
       if (!validationData.success) {
         setError(validationData.error || "Erro ao validar carrinho");
         setLoading(false);
@@ -60,11 +61,9 @@ function CheckoutContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fornecedorId,
-          clienteId,
-          itens: items.map(item => ({
+          items: items.map(item => ({
             produtoId: item.id,
             quantidade: item.quantidade,
-            precoUnitario: item.preco,
           })),
           observacoes: observacoes.trim() || null,
         }),
@@ -76,7 +75,7 @@ function CheckoutContent() {
       }
 
       const orderData = await orderResponse.json();
-      
+
       if (orderData.success) {
         clearCart();
         router.push(`/pedidos/${orderData.data.id}`);
@@ -136,8 +135,8 @@ function CheckoutContent() {
                         SKU: {item.sku} • Quantidade: {item.quantidade}
                       </p>
                     </div>
-                    <PriceDisplay 
-                      value={item.preco * item.quantidade} 
+                    <PriceDisplay
+                      value={item.preco * item.quantidade}
                       size="md"
                     />
                   </div>
@@ -189,7 +188,7 @@ function CheckoutContent() {
                     </span>
                     <PriceDisplay value={total} size="sm" />
                   </div>
-                  
+
                   <div className="border-t pt-2">
                     <div className="flex justify-between font-bold text-lg">
                       <span>Total</span>
@@ -198,9 +197,9 @@ function CheckoutContent() {
                   </div>
                 </div>
 
-                <Button 
+                <Button
                   type="submit"
-                  className="w-full" 
+                  className="w-full"
                   size="lg"
                   disabled={loading}
                 >
@@ -215,9 +214,9 @@ function CheckoutContent() {
                 </Button>
 
                 <Link href="/carrinho">
-                  <Button 
+                  <Button
                     type="button"
-                    variant="outline" 
+                    variant="outline"
                     className="w-full"
                     disabled={loading}
                   >
