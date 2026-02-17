@@ -62,16 +62,24 @@ export async function middleware(request: NextRequest) {
   if (token && !isPublicRoute) {
     const userType = token.tipo as TipoUsuario;
     const allowedRoutes = routesByRole[userType] || [];
-    
+
     const hasAccess = allowedRoutes.some((route) => pathname.startsWith(route));
-    
+
     if (!hasAccess && pathname.startsWith("/dashboard")) {
       const correctPath = getRedirectByUserType(userType);
       return NextResponse.redirect(new URL(correctPath, request.url));
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // Security headers
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+
+  return response;
 }
 
 export const config = {

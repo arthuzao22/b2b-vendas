@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { successResponse, errorResponse, handleZodError, requireAuth } from "@/lib/api-helpers";
+import { successResponse, errorResponse, handleZodError, requireRole } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 
@@ -64,7 +64,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireRole(["admin", "fornecedor"]);
     const { id } = await params;
 
     const categoria = await prisma.categoria.findUnique({
@@ -82,7 +82,7 @@ export async function PUT(
     let slug = categoria.slug;
     if (validatedData.nome && validatedData.nome !== categoria.nome) {
       slug = slugify(validatedData.nome);
-      
+
       // Verificar se slug já existe
       const slugExists = await prisma.categoria.findFirst({
         where: {
@@ -152,7 +152,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requireAuth();
+    await requireRole(["admin", "fornecedor"]);
     const { id } = await params;
 
     const categoria = await prisma.categoria.findUnique({

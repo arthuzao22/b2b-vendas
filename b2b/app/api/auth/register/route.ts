@@ -16,10 +16,10 @@ const cnpjRegex = /^\d{14}$/;
 
 const registerSchema = z.object({
   email: z.string().email("Email inválido"),
-  senha: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+  senha: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
   nome: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
   telefone: z.string().optional(),
-  tipo: z.enum(["fornecedor", "cliente", "admin"]),
+  tipo: z.enum(["fornecedor", "cliente"]),
 
   // Campos específicos para fornecedor e cliente
   razaoSocial: z.string().min(3, "Razão social deve ter no mínimo 3 caracteres").optional(),
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash da senha
-    const hashedPassword = await hash(validatedData.senha, 10);
+    const hashedPassword = await hash(validatedData.senha, 12);
 
     // Criar usuário com dados específicos do tipo em transação
     const usuario = await prisma.$transaction(async (tx) => {

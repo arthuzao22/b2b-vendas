@@ -10,8 +10,10 @@ export async function GET(request: NextRequest) {
         const user = await getUserSession();
         const { searchParams } = new URL(request.url);
 
-        const page = parseInt(searchParams.get("page") || "1");
-        const limit = Math.min(parseInt(searchParams.get("limit") || "20"), 100);
+        const parsedPage = parseInt(searchParams.get("page") || "1");
+        const parsedLimit = parseInt(searchParams.get("limit") || "20");
+        const page = isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+        const limit = isNaN(parsedLimit) || parsedLimit < 1 ? 20 : Math.min(parsedLimit, 100);
         const skip = (page - 1) * limit;
         const search = searchParams.get("search") || undefined;
         const fornecedorId = searchParams.get("fornecedorId") || undefined;

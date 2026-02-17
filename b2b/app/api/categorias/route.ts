@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { successResponse, errorResponse, handleZodError, requireAuth } from "@/lib/api-helpers";
+import { successResponse, errorResponse, handleZodError, requireRole } from "@/lib/api-helpers";
 import { slugify } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 // POST /api/categorias - Criar categoria
 export async function POST(request: NextRequest) {
   try {
-    await requireAuth();
+    await requireRole(["admin", "fornecedor"]);
 
     const body = await request.json();
     const validatedData = createCategoriaSchema.parse(body);
