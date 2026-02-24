@@ -10,19 +10,24 @@ const publicRoutes = [
   "/auth/login",
   "/auth/register",
   "/auth/error",
+  "/auth/forgot-password",
+  "/auth/reset-password",
   "/fornecedores",
   "/catalogo-publico",
   "/fornecedor",
 ];
 
+// Rotas compartilhadas acessíveis a qualquer usuário autenticado
+const sharedAuthRoutes = ["/catalogo", "/fornecedores"];
+
 // Mapeamento de rotas por tipo de usuário
 const routesByRole: Record<TipoUsuario, string[]> = {
-  [TipoUsuario.admin]: ["/dashboard/admin"],
-  [TipoUsuario.fornecedor]: ["/dashboard/fornecedor"],
-  [TipoUsuario.cliente]: ["/dashboard/cliente", "/carrinho", "/checkout", "/pedidos", "/rastreamento"],
+  [TipoUsuario.admin]: ["/dashboard/admin", ...sharedAuthRoutes],
+  [TipoUsuario.fornecedor]: ["/dashboard/fornecedor", ...sharedAuthRoutes],
+  [TipoUsuario.cliente]: ["/dashboard/cliente", "/carrinho", "/checkout", "/pedidos", "/rastreamento", ...sharedAuthRoutes],
 };
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Permitir acesso a arquivos estáticos e API

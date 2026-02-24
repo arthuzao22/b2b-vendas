@@ -284,7 +284,7 @@ async function main() {
       descricao: 'Webcam Logitech C920 Full HD 1080p, microfones estéreo, correção automática de luz',
       precoBase: 449.90,
       imagens: [
-        'https://images.unsplash.com/photo-1574296079755-d8f6e5a60c9c?w=800',
+        'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=800',
       ],
       ativo: true,
       quantidadeEstoque: 42,
@@ -379,7 +379,7 @@ async function main() {
       descricao: 'Papel sulfite A4 branco 75g/m², 500 folhas, alta qualidade para impressão',
       precoBase: 29.90,
       imagens: [
-        'https://images.unsplash.com/photo-1587033757492-17c2c7788ac3?w=800',
+        'https://images.unsplash.com/photo-1586953208270-767889fa9b55?w=800',
       ],
       ativo: true,
       quantidadeEstoque: 200,
@@ -397,7 +397,7 @@ async function main() {
       descricao: 'Organizador de mesa em acrílico transparente, 5 compartimentos, design moderno',
       precoBase: 89.90,
       imagens: [
-        'https://images.unsplash.com/photo-1590247814433-f2ce8c8f0755?w=800',
+        'https://images.unsplash.com/photo-1544816155-12df9643f363?w=800',
       ],
       ativo: true,
       quantidadeEstoque: 45,

@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
+import { useSession } from "next-auth/react"
 import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -29,17 +30,17 @@ export default function ProdutosPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const perPage = 10
+  const { data: session } = useSession()
+  const fornecedorId = session?.user?.fornecedorId
 
-  useEffect(() => {
-    fetchProdutos()
-  }, [page, search])
-
-  const fetchProdutos = async () => {
+  const fetchProdutos = useCallback(async () => {
+    if (!fornecedorId) return
     try {
       setLoading(true)
       const params = new URLSearchParams({
         page: page.toString(),
         limit: perPage.toString(),
+        fornecedorId,
         ...(search && { search }),
       })
       
@@ -48,14 +49,18 @@ export default function ProdutosPage() {
 
       if (data.success) {
         setProdutos(data.data.produtos)
-        setTotal(data.data.total)
+        setTotal(data.data.pagination?.total ?? data.data.total ?? 0)
       }
     } catch (error) {
       console.error("Erro ao carregar produtos:", error)
     } finally {
       setLoading(false)
     }
-  }
+  }, [page, search, fornecedorId])
+
+  useEffect(() => {
+    fetchProdutos()
+  }, [fetchProdutos])
 
   const handleDelete = async (id: string) => {
     if (!confirm("Tem certeza que deseja excluir este produto?")) {
