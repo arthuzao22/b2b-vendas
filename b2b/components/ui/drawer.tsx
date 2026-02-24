@@ -58,7 +58,7 @@ export function Drawer({
       >
         {/* Header */}
         {title && (
-          <div className="flex items-center justify-between border-b px-6 py-4">
+          <div className="flex items-center justify-between border-b px-4 py-3 sm:px-6 sm:py-4">
             <h2 className="text-lg font-semibold">{title}</h2>
             <Button variant="ghost" size="sm" onClick={onClose}>
               <X className="h-4 w-4" />
@@ -67,7 +67,7 @@ export function Drawer({
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">{children}</div>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
       </div>
     </>
   );

@@ -108,7 +108,7 @@ export default async function RelatoriosPage() {
           ]}
         />
         <div className="mt-4">
-          <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Relatórios</h1>
           <p className="text-muted-foreground">
             Visão consolidada dos dados do marketplace
           </p>
@@ -116,7 +116,7 @@ export default async function RelatoriosPage() {
       </div>
 
       {/* Main Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total de Pedidos</CardTitle>
@@ -205,10 +205,10 @@ export default async function RelatoriosPage() {
         <CardContent>
           <div className="space-y-4">
             {data.produtosPorCategoria.map((categoria) => (
-              <div key={categoria.nome} className="flex items-center justify-between">
+              <div key={categoria.nome} className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                 <span className="text-sm font-medium">{categoria.nome}</span>
                 <div className="flex items-center gap-3">
-                  <div className="w-48 bg-gray-200 rounded-full h-2">
+                  <div className="w-full sm:w-48 bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-blue-600 h-2 rounded-full"
                       style={{

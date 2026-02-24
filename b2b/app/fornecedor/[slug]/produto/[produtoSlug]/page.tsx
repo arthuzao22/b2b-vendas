@@ -131,7 +131,7 @@ export default async function ProdutoPage({
     const temDesconto = precoFinal < precoBase;
 
     return (
-        <div className="container mx-auto py-8">
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <Breadcrumbs
                 items={[
                     { label: "Catálogo", href: "/catalogo" },
@@ -191,7 +191,7 @@ export default async function ProdutoPage({
                                     {tipoPreco === "customizado" ? "Preço Especial" : "Preço de Lista"}
                                 </span>
                             )}
-                            <h1 className="text-3xl font-bold tracking-tight">{produto.nome}</h1>
+                            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{produto.nome}</h1>
                             <p className="text-muted-foreground mt-1">SKU: {produto.sku}</p>
                         </div>
 

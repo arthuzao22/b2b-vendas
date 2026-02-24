@@ -189,14 +189,14 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Analytics</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Analytics</h1>
           <p className="text-gray-600 mt-1">
             Análise detalhada de vendas e performance
           </p>
         </div>
 
         {/* Period Filter */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant={period === "7d" ? "default" : "outline"}
             size="sm"
@@ -223,7 +223,7 @@ export default function AnalyticsPage() {
 
       {/* KPIs */}
       {kpis && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Faturamento</CardTitle>

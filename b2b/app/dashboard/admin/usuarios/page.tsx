@@ -129,7 +129,7 @@ export default async function UsuariosPage() {
           ]}
         />
         <div className="mt-4">
-          <h1 className="text-3xl font-bold tracking-tight">Gestão de Usuários</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gestão de Usuários</h1>
           <p className="text-muted-foreground">
             Gerencie todos os usuários da plataforma
           </p>

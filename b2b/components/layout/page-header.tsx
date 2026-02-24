@@ -23,9 +23,9 @@ export function PageHeader({
             {breadcrumbs && breadcrumbs.length > 0 && (
                 <Breadcrumbs items={breadcrumbs} />
             )}
-            <div className="flex items-center justify-between gap-[var(--space-4)]">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                    <h2 className="text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))] tracking-[var(--tracking-tight)] truncate">
+                    <h2 className="text-[length:var(--text-xl)] sm:text-[length:var(--text-2xl)] font-bold text-[hsl(var(--color-neutral-900))] tracking-[var(--tracking-tight)]">
                         {title}
                     </h2>
                     {subtitle && (
@@ -35,7 +35,7 @@ export function PageHeader({
                     )}
                 </div>
                 {actions && (
-                    <div className="flex items-center gap-[var(--space-3)] shrink-0">
+                    <div className="flex items-center gap-[var(--space-3)] shrink-0 self-start sm:self-auto">
                         {actions}
                     </div>
                 )}

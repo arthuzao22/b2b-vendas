@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { MultiImageUpload } from "@/components/ui/multi-image-upload"
 
 interface Categoria {
   id: string
@@ -24,6 +25,7 @@ interface Produto {
   quantidadeEstoque: number
   estoqueMinimo: number
   unidadeMedida: string
+  imagens?: string[]
 }
 
 export default function EditarProdutoPage() {
@@ -43,6 +45,7 @@ export default function EditarProdutoPage() {
     estoqueMinimo: "",
     unidadeMedida: "UN",
   })
+  const [imagens, setImagens] = useState<string[]>([])
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
@@ -81,6 +84,7 @@ export default function EditarProdutoPage() {
           estoqueMinimo: produto.estoqueMinimo.toString(),
           unidadeMedida: produto.unidadeMedida || "UN",
         })
+        setImagens(produto.imagens || [])
       } else {
         alert(data.error || "Erro ao carregar produto")
         router.push("/dashboard/fornecedor/produtos")
@@ -149,6 +153,7 @@ export default function EditarProdutoPage() {
           precoBase: Number(formData.precoBase),
           quantidadeEstoque: Number(formData.quantidadeEstoque),
           estoqueMinimo: Number(formData.estoqueMinimo),
+          imagens,
         }),
       })
 
@@ -368,14 +373,15 @@ export default function EditarProdutoPage() {
                 </select>
               </div>
 
-              {/* Image Upload Placeholder */}
+              {/* Upload de Imagens */}
               <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="imagem">Imagem do Produto</Label>
-                <div className="border-2 border-dashed rounded-md p-8 text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Upload de imagem será implementado em breve
-                  </p>
-                </div>
+                <Label>Imagens do Produto</Label>
+                <MultiImageUpload
+                  value={imagens}
+                  onChange={setImagens}
+                  disabled={loading}
+                  maxImages={5}
+                />
               </div>
             </div>
 

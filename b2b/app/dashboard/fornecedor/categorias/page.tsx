@@ -4,7 +4,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/data-table";
-import { Dialog } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Plus, Edit, Trash2, FolderTree } from "lucide-react";
@@ -194,14 +200,14 @@ export default function CategoriasPage() {
             { label: "Categorias" },
           ]}
         />
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Categorias</h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Categorias</h1>
             <p className="text-muted-foreground">
               Gerencie as categorias dos seus produtos
             </p>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
+          <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Nova Categoria
           </Button>
@@ -224,11 +230,16 @@ export default function CategoriasPage() {
       </Card>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <div className="p-6">
-          <h2 className="text-xl font-bold mb-4">
-            {editingCategoria ? "Editar Categoria" : "Nova Categoria"}
-          </h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingCategoria ? "Editar Categoria" : "Nova Categoria"}
+            </DialogTitle>
+            <DialogDescription>
+              {editingCategoria ? "Atualize as informações da categoria" : "Crie uma nova categoria para seus produtos"}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 px-6 pb-6">
             <FormField
               label="Nome"
               id="nome"
@@ -280,7 +291,7 @@ export default function CategoriasPage() {
               </Button>
             </div>
           </form>
-        </div>
+        </DialogContent>
       </Dialog>
     </div>
   );

@@ -78,7 +78,7 @@ export default function PrecosCustomizadosPage() {
 
       if (precosRes.ok) {
         const data = await precosRes.json();
-        setPrecos(data.data || []);
+        setPrecos(data.data?.precos || []);
       }
 
       if (clientesRes.ok) {
@@ -208,7 +208,7 @@ export default function PrecosCustomizadosPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Preços Customizados</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Preços Customizados</h1>
           <p className="text-gray-600 mt-1">
             Gerencie preços especiais para clientes específicos
           </p>
@@ -352,15 +352,47 @@ export default function PrecosCustomizadosPage() {
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            {/* Mobile Cards */}
+            <div className="md:hidden divide-y">
+              {filteredPrecos.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">Nenhum preço customizado encontrado</div>
+              ) : (
+                filteredPrecos.map((preco) => {
+                  const economia = parseFloat(preco.produto.precoBase) - parseFloat(preco.preco);
+                  const economiaPercent = (economia / parseFloat(preco.produto.precoBase)) * 100;
+                  return (
+                    <div key={preco.id} className="p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="font-medium truncate">{preco.cliente.nomeFantasia || preco.cliente.razaoSocial}</p>
+                          <p className="text-sm text-gray-500">{preco.produto.nome} <span className="text-xs">(SKU: {preco.produto.sku})</span></p>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <Button size="sm" variant="outline" onClick={() => handleEdit(preco)}><Edit className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="outline" onClick={() => handleDelete(preco.id)}><Trash2 className="h-4 w-4" /></Button>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500">Base: {formatCurrency(preco.produto.precoBase)}</span>
+                        <span className="font-semibold text-green-600">{formatCurrency(preco.preco)}</span>
+                      </div>
+                      <p className="text-xs text-gray-500">Economia: {formatCurrency(economia)} ({economiaPercent.toFixed(1)}%)</p>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Desktop Table */}
+            <table className="w-full hidden md:table">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4">Cliente</th>
-                  <th className="text-left py-3 px-4">Produto</th>
-                  <th className="text-right py-3 px-4">Preço Base</th>
-                  <th className="text-right py-3 px-4">Preço Customizado</th>
-                  <th className="text-right py-3 px-4">Economia</th>
-                  <th className="text-right py-3 px-4">Ações</th>
+                  <th className="text-left py-2 px-3 md:py-3 md:px-4">Cliente</th>
+                  <th className="text-left py-2 px-3 md:py-3 md:px-4">Produto</th>
+                  <th className="text-right py-2 px-3 md:py-3 md:px-4">Preço Base</th>
+                  <th className="text-right py-2 px-3 md:py-3 md:px-4">Preço Customizado</th>
+                  <th className="text-right py-2 px-3 md:py-3 md:px-4">Economia</th>
+                  <th className="text-right py-2 px-3 md:py-3 md:px-4">Ações</th>
                 </tr>
               </thead>
               <tbody>

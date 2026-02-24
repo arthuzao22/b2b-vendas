@@ -4,7 +4,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/data-table";
-import { Dialog } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { Badge } from "@/components/ui/badge";
@@ -348,14 +354,14 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
             { label: "Estoque" },
           ]}
         />
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Gestão de Estoque</h1>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gestão de Estoque</h1>
             <p className="text-muted-foreground">
               Gerencie o estoque dos seus produtos
             </p>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
+          <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Nova Movimentação
           </Button>
@@ -363,7 +369,7 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total em Estoque</CardTitle>
@@ -420,10 +426,10 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 border-b">
+      <div className="flex gap-1 sm:gap-2 border-b overflow-x-auto">
         <button
           onClick={() => setActiveTab("dashboard")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "dashboard"
+          className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === "dashboard"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
@@ -432,7 +438,7 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
         </button>
         <button
           onClick={() => setActiveTab("movimentacoes")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "movimentacoes"
+          className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === "movimentacoes"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
@@ -441,7 +447,7 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
         </button>
         <button
           onClick={() => setActiveTab("produtos")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === "produtos"
+          className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${activeTab === "produtos"
               ? "border-primary text-primary"
               : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
@@ -455,7 +461,7 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
         <div className="space-y-6">
           {/* Dashboard KPIs */}
           {dashboardData && (
-            <div className="grid gap-4 md:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
@@ -522,10 +528,10 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
                   {alertas.map((alerta) => (
                     <div
                       key={alerta.produtoId}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                      className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg hover:bg-gray-50"
                     >
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
                           <p className="font-medium">{alerta.nome}</p>
                           <Badge
                             className={
@@ -548,7 +554,7 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
                         </p>
                       </div>
                       <Link href={`/dashboard/fornecedor/produtos/${alerta.produtoId}/movimentacoes`}>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="w-full sm:w-auto">
                           <Eye className="h-4 w-4 mr-2" />
                           Ver Histórico
                         </Button>
@@ -596,9 +602,13 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
 
       {/* Dialog para Nova Movimentação */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <div className="p-6 max-w-md">
-          <h2 className="text-xl font-bold mb-4">Nova Movimentação de Estoque</h2>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Nova Movimentação de Estoque</DialogTitle>
+            <DialogDescription>Registre uma nova entrada, saída ou ajuste de estoque</DialogDescription>
+          </DialogHeader>
 
+          <div className="px-6 pb-6">
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-red-800 text-sm">
               {error}
@@ -684,7 +694,8 @@ export function EstoqueClient({ movimentacoes: initialMovimentacoes, produtos }:
               </Button>
             </div>
           </form>
-        </div>
+          </div>
+        </DialogContent>
       </Dialog>
     </div>
   );

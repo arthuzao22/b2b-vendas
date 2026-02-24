@@ -44,6 +44,7 @@ const navItems: Record<string, NavItem[]> = {
     { title: "Categorias", href: "/dashboard/fornecedor/categorias", icon: Folder, section: "management" },
     { title: "Estoque", href: "/dashboard/fornecedor/estoque", icon: Box, section: "management" },
     { title: "Preços", href: "/dashboard/fornecedor/precos", icon: DollarSign, section: "management" },
+    { title: "Preços Customizados", href: "/dashboard/fornecedor/precos-customizados", icon: DollarSign, section: "management" },
     { title: "Configurações", href: "/dashboard/fornecedor/configuracoes", icon: Settings, section: "settings" },
   ],
   cliente: [

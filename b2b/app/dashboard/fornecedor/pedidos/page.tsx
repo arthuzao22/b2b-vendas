@@ -165,7 +165,7 @@ export default function PedidosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Pedidos</h1>
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Pedidos</h1>
         <p className="text-muted-foreground">
           Gerencie os pedidos dos seus clientes
         </p>
@@ -209,26 +209,67 @@ export default function PedidosPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              {/* Mobile Cards */}
+              <div className="md:hidden divide-y">
+                {pedidos.map((pedido) => (
+                  <div key={pedido.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-mono font-semibold text-sm">{pedido.numeroPedido}</p>
+                        <p className="text-sm font-medium truncate">{pedido.cliente.razaoSocial || pedido.cliente.usuario?.nome}</p>
+                      </div>
+                      <span className="font-bold shrink-0">{formatCurrency(pedido.total)}</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-sm text-muted-foreground">{formatDate(pedido.criadoEm)}</span>
+                      <select
+                        value={pedido.status}
+                        onChange={(e) => handleStatusChange(pedido.id, e.target.value)}
+                        className="text-xs font-semibold rounded-full px-2.5 py-1 border bg-background"
+                      >
+                        <option value="pendente">Pendente</option>
+                        <option value="confirmado">Confirmado</option>
+                        <option value="processando">Processando</option>
+                        <option value="enviado">Enviado</option>
+                        <option value="entregue">Entregue</option>
+                        <option value="cancelado">Cancelado</option>
+                      </select>
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewPedido(pedido.id)}
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Detalhes
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table */}
+              <table className="w-full hidden md:table">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    <th className="text-left p-4 font-medium">Número do Pedido</th>
-                    <th className="text-left p-4 font-medium">Cliente</th>
-                    <th className="text-left p-4 font-medium">Data</th>
-                    <th className="text-left p-4 font-medium">Status</th>
-                    <th className="text-left p-4 font-medium">Total</th>
-                    <th className="text-right p-4 font-medium">Ações</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Número do Pedido</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Cliente</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Data</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Status</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Total</th>
+                    <th className="text-right p-3 lg:p-4 font-medium">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pedidos.map((pedido) => (
                     <tr key={pedido.id} className="border-b hover:bg-muted/50">
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <span className="font-mono font-semibold">
                           {pedido.numeroPedido}
                         </span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <div className="space-y-1">
                           <p className="font-medium">{pedido.cliente.razaoSocial || pedido.cliente.usuario?.nome}</p>
                           <p className="text-sm text-muted-foreground">
@@ -236,12 +277,12 @@ export default function PedidosPage() {
                           </p>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <span className="text-sm">
                           {formatDate(pedido.criadoEm)}
                         </span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <select
                           value={pedido.status}
                           onChange={(e) => handleStatusChange(pedido.id, e.target.value)}
@@ -255,10 +296,10 @@ export default function PedidosPage() {
                           <option value="cancelado">Cancelado</option>
                         </select>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <span className="font-bold">{formatCurrency(pedido.total)}</span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <div className="flex justify-end gap-2">
                           <Button
                             variant="ghost"
@@ -281,11 +322,11 @@ export default function PedidosPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             Mostrando {(page - 1) * perPage + 1} a {Math.min(page * perPage, total)} de {total} pedidos
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center sm:justify-end">
             <Button
               variant="outline"
               onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -321,7 +362,7 @@ export default function PedidosPage() {
           ) : selectedPedido ? (
             <div className="space-y-6">
               {/* Order Header */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Número do Pedido</p>
                   <p className="font-mono font-bold">{selectedPedido.numeroPedido}</p>
@@ -347,7 +388,21 @@ export default function PedidosPage() {
               <div>
                 <h3 className="font-semibold mb-4">Itens do Pedido</h3>
                 <div className="border rounded-lg overflow-hidden">
-                  <table className="w-full">
+                  {/* Mobile items list */}
+                  <div className="sm:hidden divide-y">
+                    {selectedPedido.itens.map((item) => (
+                      <div key={item.id} className="p-3 space-y-1">
+                        <p className="font-medium text-sm">{item.produto.nome}</p>
+                        <p className="text-xs text-muted-foreground">SKU: {item.produto.sku}</p>
+                        <div className="flex justify-between text-sm">
+                          <span>{item.quantidade}x {formatCurrency(item.precoUnitario)}</span>
+                          <span className="font-medium">{formatCurrency(item.precoTotal)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Desktop items table */}
+                  <table className="w-full hidden sm:table">
                     <thead className="bg-muted/50">
                       <tr>
                         <th className="text-left p-3 text-sm font-medium">Produto</th>

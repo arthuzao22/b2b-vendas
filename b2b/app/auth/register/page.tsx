@@ -45,7 +45,7 @@ export default function RegisterPage() {
         senha: formData.senha,
         nome: formData.nome,
         telefone: formData.telefone,
-        tipo: userType,
+        tipo: userType.toLowerCase(),
       };
 
       if (userType === "FORNECEDOR") {
@@ -264,7 +264,7 @@ export default function RegisterPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-[var(--space-3)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-[var(--space-3)]">
             <div className="space-y-[var(--space-1-5)]">
               <Label htmlFor="cidade">Cidade</Label>
               <Input

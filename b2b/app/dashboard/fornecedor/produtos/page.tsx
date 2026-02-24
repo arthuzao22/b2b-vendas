@@ -82,15 +82,15 @@ export default function ProdutosPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Produtos</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Produtos</h1>
           <p className="text-muted-foreground">
             Gerencie seu catálogo de produtos
           </p>
         </div>
         <Link href="/dashboard/fornecedor/produtos/novo">
-          <Button>
+          <Button className="w-full sm:w-auto">
             <Plus className="mr-2 h-4 w-4" />
             Novo Produto
           </Button>
@@ -144,22 +144,75 @@ export default function ProdutosPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              {/* Mobile Cards */}
+              <div className="md:hidden divide-y">
+                {produtos.map((produto) => (
+                  <div key={produto.id} className="p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-14 h-14 bg-muted rounded-md flex items-center justify-center overflow-hidden shrink-0">
+                        {produto.imagemUrl ? (
+                          <img
+                            src={produto.imagemUrl}
+                            alt={produto.nome}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{produto.nome}</p>
+                        <p className="text-sm text-muted-foreground font-mono">{produto.sku}</p>
+                      </div>
+                      <Badge variant={produto.ativo ? "success" : "secondary"} className="shrink-0">
+                        {produto.ativo ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <div>
+                        <span className="font-semibold">{formatCurrency(produto.precoBase)}</span>
+                        <span className="text-xs text-muted-foreground">/{produto.unidadeMedida}</span>
+                      </div>
+                      <div className={produto.quantidadeEstoque <= produto.estoqueMinimo ? "text-yellow-600 font-semibold" : "text-muted-foreground"}>
+                        Estoque: {produto.quantidadeEstoque} {produto.unidadeMedida}
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Link href={`/dashboard/fornecedor/produtos/${produto.id}/editar`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(produto.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table */}
+              <table className="w-full hidden md:table">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    <th className="text-left p-4 font-medium">Imagem</th>
-                    <th className="text-left p-4 font-medium">Produto</th>
-                    <th className="text-left p-4 font-medium">SKU</th>
-                    <th className="text-left p-4 font-medium">Preço Base</th>
-                    <th className="text-left p-4 font-medium">Estoque</th>
-                    <th className="text-left p-4 font-medium">Status</th>
-                    <th className="text-right p-4 font-medium">Ações</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Imagem</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Produto</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">SKU</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Preço Base</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Estoque</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Status</th>
+                    <th className="text-right p-3 lg:p-4 font-medium">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {produtos.map((produto) => (
                     <tr key={produto.id} className="border-b hover:bg-muted/50">
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center overflow-hidden">
                           {produto.imagemUrl ? (
                             <img
@@ -172,7 +225,7 @@ export default function ProdutosPage() {
                           )}
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <div className="space-y-1">
                           <p className="font-medium">{produto.nome}</p>
                           <p className="text-sm text-muted-foreground line-clamp-1">
@@ -180,10 +233,10 @@ export default function ProdutosPage() {
                           </p>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <span className="font-mono text-sm">{produto.sku}</span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <span className="font-semibold">
                           {formatCurrency(produto.precoBase)}
                         </span>
@@ -191,7 +244,7 @@ export default function ProdutosPage() {
                           /{produto.unidadeMedida}
                         </span>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <div className="space-y-1">
                           <p className={produto.quantidadeEstoque <= produto.estoqueMinimo ? "text-yellow-600 font-semibold" : ""}>
                             {produto.quantidadeEstoque} {produto.unidadeMedida}
@@ -201,12 +254,12 @@ export default function ProdutosPage() {
                           </p>
                         </div>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <Badge variant={produto.ativo ? "success" : "secondary"}>
                           {produto.ativo ? "Ativo" : "Inativo"}
                         </Badge>
                       </td>
-                      <td className="p-4">
+                      <td className="p-3 lg:p-4">
                         <div className="flex justify-end gap-2">
                           <Link href={`/dashboard/fornecedor/produtos/${produto.id}/editar`}>
                             <Button variant="ghost" size="icon">
@@ -233,11 +286,11 @@ export default function ProdutosPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             Mostrando {(page - 1) * perPage + 1} a {Math.min(page * perPage, total)} de {total} produtos
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center sm:justify-end">
             <Button
               variant="outline"
               onClick={() => setPage(p => Math.max(1, p - 1))}

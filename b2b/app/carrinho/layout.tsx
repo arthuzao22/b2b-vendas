@@ -2,6 +2,8 @@ import { ReactNode } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { ClientSidebar } from "@/components/client-sidebar";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 export default async function CarrinhoLayout({
     children,
@@ -21,7 +23,7 @@ export default async function CarrinhoLayout({
 
                 {/* Main content area with sidebar offset */}
                 <main className="lg:pl-64">
-                    <div className="p-4 sm:p-6 lg:p-8">
+                    <div className="pt-14 lg:pt-0 p-4 sm:p-6 lg:p-8">
                         {children}
                     </div>
                 </main>
@@ -29,10 +31,14 @@ export default async function CarrinhoLayout({
         );
     }
 
-    // Se não está logado ou não é cliente, mostra sem sidebar
+    // Se não está logado ou não é cliente, mostra com Header e Footer
     return (
-        <div className="min-h-screen bg-background">
-            {children}
-        </div>
+        <>
+            <Header />
+            <main className="min-h-screen bg-background">
+                {children}
+            </main>
+            <Footer />
+        </>
     );
 }

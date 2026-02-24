@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Users, Plus, Search, Eye, Edit, X } from "lucide-react"
+import { Users, Plus, Search, Eye, Edit, X, Link2 } from "lucide-react"
+import Link from "next/link"
 import {
   Dialog,
   DialogContent,
@@ -45,16 +46,23 @@ export default function ClientesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null)
   const [formData, setFormData] = useState({
+    nome: "",
     razaoSocial: "",
     nomeFantasia: "",
     cnpj: "",
     email: "",
+    senha: "",
     telefone: "",
     endereco: "",
     cidade: "",
     estado: "",
     cep: "",
   })
+  const [isLinkDialogOpen, setIsLinkDialogOpen] = useState(false)
+  const [linkSearch, setLinkSearch] = useState("")
+  const [linkResults, setLinkResults] = useState<any[]>([])
+  const [linkSearching, setLinkSearching] = useState(false)
+  const [linking, setLinking] = useState(false)
   const [saving, setSaving] = useState(false)
   const perPage = 10
 
@@ -93,10 +101,12 @@ export default function ClientesPage() {
   const handleEditCliente = (cliente: Cliente) => {
     setSelectedCliente(cliente)
     setFormData({
+      nome: "",
       razaoSocial: cliente.razaoSocial,
       nomeFantasia: cliente.nomeFantasia,
       cnpj: cliente.cnpj,
       email: cliente.email,
+      senha: "",
       telefone: cliente.telefone,
       endereco: cliente.endereco || "",
       cidade: cliente.cidade,
@@ -109,10 +119,12 @@ export default function ClientesPage() {
   const handleAddCliente = () => {
     setSelectedCliente(null)
     setFormData({
+      nome: "",
       razaoSocial: "",
       nomeFantasia: "",
       cnpj: "",
       email: "",
+      senha: "",
       telefone: "",
       endereco: "",
       cidade: "",
@@ -162,6 +174,50 @@ export default function ClientesPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleSearchLinkClientes = async () => {
+    if (!linkSearch || linkSearch.length < 2) return
+    setLinkSearching(true)
+    try {
+      const response = await fetch(
+        `/api/clientes/buscar-independentes?busca=${encodeURIComponent(linkSearch)}`
+      )
+      const data = await response.json()
+      if (data.success) {
+        setLinkResults(data.data.clientes || [])
+      }
+    } catch (error) {
+      console.error("Erro ao buscar clientes:", error)
+    } finally {
+      setLinkSearching(false)
+    }
+  }
+
+  const handleLinkCliente = async (clienteId: string) => {
+    setLinking(true)
+    try {
+      const response = await fetch("/api/clientes/buscar-independentes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ clienteId }),
+      })
+      const data = await response.json()
+      if (response.ok && data.success) {
+        await fetchClientes()
+        setIsLinkDialogOpen(false)
+        setLinkSearch("")
+        setLinkResults([])
+        alert("Cliente vinculado com sucesso!")
+      } else {
+        alert(data.error || "Erro ao vincular cliente")
+      }
+    } catch (error) {
+      console.error("Erro ao vincular cliente:", error)
+      alert("Erro ao vincular cliente")
+    } finally {
+      setLinking(false)
+    }
+  }
+
   const totalPages = Math.ceil(total / perPage)
 
   return (
@@ -173,10 +229,16 @@ export default function ClientesPage() {
             Gerencie seus clientes e suas listas de preço
           </p>
         </div>
-        <Button onClick={handleAddCliente}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Cliente
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setIsLinkDialogOpen(true)}>
+            <Link2 className="mr-2 h-4 w-4" />
+            Vincular Cliente Existente
+          </Button>
+          <Button onClick={handleAddCliente}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Cliente
+          </Button>
+        </div>
       </div>
 
       {/* Search */}
@@ -224,16 +286,62 @@ export default function ClientesPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              {/* Mobile Cards */}
+              <div className="md:hidden divide-y">
+                {clientes.map((cliente) => (
+                  <div key={cliente.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{cliente.razaoSocial}</p>
+                        {cliente.nomeFantasia && (
+                          <p className="text-sm text-muted-foreground truncate">{cliente.nomeFantasia}</p>
+                        )}
+                      </div>
+                      <Badge variant={cliente.ativo ? "success" : "secondary"} className="shrink-0">
+                        {cliente.ativo ? "Ativo" : "Inativo"}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>
+                        <p className="text-muted-foreground text-xs">CNPJ</p>
+                        <p className="font-mono text-xs">{cliente.cnpj}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground text-xs">Localização</p>
+                        <p>{cliente.cidade}, {cliente.estado}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground text-xs">Contato</p>
+                        <p className="truncate">{cliente.email}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground text-xs">Lista de Preço</p>
+                        <p>{cliente.listaPreco?.nome || "Sem lista"}</p>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm" onClick={() => handleViewCliente(cliente)}>
+                        <Eye className="h-4 w-4 mr-1" /> Ver
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleEditCliente(cliente)}>
+                        <Edit className="h-4 w-4 mr-1" /> Editar
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table */}
+              <table className="w-full hidden md:table">
                 <thead className="border-b bg-muted/50">
                   <tr>
-                    <th className="text-left p-4 font-medium">Cliente</th>
-                    <th className="text-left p-4 font-medium">CNPJ</th>
-                    <th className="text-left p-4 font-medium">Contato</th>
-                    <th className="text-left p-4 font-medium">Localização</th>
-                    <th className="text-left p-4 font-medium">Lista de Preço</th>
-                    <th className="text-left p-4 font-medium">Status</th>
-                    <th className="text-right p-4 font-medium">Ações</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Cliente</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">CNPJ</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Contato</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Localização</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Lista de Preço</th>
+                    <th className="text-left p-3 lg:p-4 font-medium">Status</th>
+                    <th className="text-right p-3 lg:p-4 font-medium">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -283,14 +391,15 @@ export default function ClientesPage() {
                       </td>
                       <td className="p-4">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            title="Ver detalhes"
-                            onClick={() => handleViewCliente(cliente)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                          <Link href={`/dashboard/fornecedor/clientes/${cliente.id}`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title="Ver detalhes"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
                           <Button
                             variant="ghost"
                             size="icon"
@@ -312,11 +421,11 @@ export default function ClientesPage() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground text-center sm:text-left">
             Mostrando {(page - 1) * perPage + 1} a {Math.min(page * perPage, total)} de {total} clientes
           </p>
-          <div className="flex gap-2">
+          <div className="flex gap-2 justify-center sm:justify-end">
             <Button
               variant="outline"
               onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -347,7 +456,7 @@ export default function ClientesPage() {
 
           {selectedCliente && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Razão Social</p>
                   <p className="font-medium">{selectedCliente.razaoSocial}</p>
@@ -374,7 +483,7 @@ export default function ClientesPage() {
                   <p className="text-sm text-muted-foreground">Telefone</p>
                   <p className="font-medium">{selectedCliente.telefone}</p>
                 </div>
-                <div className="col-span-2">
+                <div className="sm:col-span-2">
                   <p className="text-sm text-muted-foreground">Endereço</p>
                   <p className="font-medium">{selectedCliente.endereco || "-"}</p>
                 </div>
@@ -422,7 +531,42 @@ export default function ClientesPage() {
           </DialogHeader>
 
           <form onSubmit={handleSaveCliente} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {!selectedCliente && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="nome">
+                      Nome do Responsável <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="nome"
+                      name="nome"
+                      value={formData.nome}
+                      onChange={handleFormChange}
+                      placeholder="Mínimo 3 caracteres"
+                      required
+                      minLength={3}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="senha">
+                      Senha <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="senha"
+                      name="senha"
+                      type="password"
+                      value={formData.senha}
+                      onChange={handleFormChange}
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="razaoSocial">
                   Razão Social <span className="text-destructive">*</span>
@@ -496,7 +640,7 @@ export default function ClientesPage() {
                 />
               </div>
 
-              <div className="space-y-2 col-span-2">
+              <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="endereco">Endereço</Label>
                 <Input
                   id="endereco"
@@ -550,6 +694,83 @@ export default function ClientesPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link Existing Client Dialog */}
+      <Dialog open={isLinkDialogOpen} onOpenChange={(open) => {
+        setIsLinkDialogOpen(open)
+        if (!open) {
+          setLinkSearch("")
+          setLinkResults([])
+        }
+      }}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Vincular Cliente Existente</DialogTitle>
+            <DialogDescription>
+              Busque um cliente já cadastrado na plataforma pelo e-mail, CNPJ ou razão social para vinculá-lo ao seu perfil de fornecedor.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por e-mail, CNPJ ou razão social..."
+                  value={linkSearch}
+                  onChange={(e) => setLinkSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      handleSearchLinkClientes()
+                    }
+                  }}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                onClick={handleSearchLinkClientes}
+                disabled={linkSearching || linkSearch.length < 2}
+              >
+                {linkSearching ? "Buscando..." : "Buscar"}
+              </Button>
+            </div>
+
+            {linkResults.length > 0 && (
+              <div className="border rounded-md max-h-[300px] overflow-y-auto">
+                {linkResults.map((c: any) => (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between p-3 border-b last:border-b-0 hover:bg-muted/50"
+                  >
+                    <div>
+                      <p className="font-medium">{c.razaoSocial}</p>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <span>{c.email}</span>
+                        <span className="font-mono">{c.cnpj}</span>
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleLinkCliente(c.id)}
+                      disabled={linking}
+                    >
+                      <Link2 className="mr-1 h-3 w-3" />
+                      Vincular
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {linkResults.length === 0 && linkSearch.length >= 2 && !linkSearching && (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Nenhum cliente encontrado. Verifique se o cliente já se cadastrou na plataforma.
+              </p>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

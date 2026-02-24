@@ -6,6 +6,7 @@ import { slugify } from "@/lib/utils";
 import { logger } from "@/lib/logger";
 import { Decimal } from "@prisma/client/runtime/library";
 import { StatusPedido } from "@prisma/client";
+import { del } from "@vercel/blob";
 
 const updateProdutoSchema = z.object({
   nome: z.string().min(3, "Nome deve ter no mínimo 3 caracteres").optional(),
@@ -113,6 +114,23 @@ export async function PUT(
 
     const body = await request.json();
     const validatedData = updateProdutoSchema.parse(body);
+
+    // Limpar imagens removidas do Vercel Blob
+    if (validatedData.imagens) {
+      const imagensRemovidas = produtoExistente.imagens.filter(
+        (url) => !validatedData.imagens!.includes(url)
+      );
+      for (const url of imagensRemovidas) {
+        if (url.includes('.blob.vercel-storage.com')) {
+          try {
+            await del(url);
+            logger.info('Imagem removida do Blob durante atualização', { url });
+          } catch (err) {
+            logger.warn('Falha ao remover imagem do Blob', { url, error: err });
+          }
+        }
+      }
+    }
 
     // Verificar se categoria existe
     if (validatedData.categoriaId) {
@@ -283,6 +301,20 @@ export async function DELETE(
         `Não é possível excluir o produto. Existe pedido ${pedidosPendentes.pedido.numeroPedido} com status ${pedidosPendentes.pedido.status}`,
         409
       );
+    }
+
+    // Limpar imagens do Vercel Blob antes de deletar
+    if (produto.imagens && produto.imagens.length > 0) {
+      for (const url of produto.imagens) {
+        if (url.includes('.blob.vercel-storage.com')) {
+          try {
+            await del(url);
+            logger.info('Imagem removida do Blob durante deleção', { url });
+          } catch (err) {
+            logger.warn('Falha ao remover imagem do Blob', { url, error: err });
+          }
+        }
+      }
     }
 
     await prisma.produto.delete({

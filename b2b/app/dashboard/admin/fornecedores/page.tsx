@@ -122,7 +122,7 @@ export default async function FornecedoresPage() {
           ]}
         />
         <div className="mt-4">
-          <h1 className="text-3xl font-bold tracking-tight">Gestão de Fornecedores</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Gestão de Fornecedores</h1>
           <p className="text-muted-foreground">
             Gerencie e aprove fornecedores da plataforma
           </p>
@@ -130,7 +130,7 @@ export default async function FornecedoresPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total</CardTitle>

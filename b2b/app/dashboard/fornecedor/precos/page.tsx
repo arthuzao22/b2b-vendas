@@ -253,7 +253,7 @@ export default function PrecosPage() {
             { label: "Listas de Preço" },
           ]}
         />
-        <div className="flex items-center justify-between mt-[var(--space-4)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-[var(--space-4)]">
           <div>
             <h1 className="text-[length:var(--text-2xl)] font-bold tracking-tight text-[hsl(var(--color-neutral-900))]">
               Listas de Preço
@@ -262,7 +262,7 @@ export default function PrecosPage() {
               Gerencie as listas de preços e descontos para seus clientes
             </p>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
+          <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
             <Plus className="mr-2 size-4" />
             Nova Lista
           </Button>

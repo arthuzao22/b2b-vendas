@@ -130,7 +130,7 @@ export default function ConfiguracoesClientePage() {
                     ]}
                 />
                 <div className="mt-4">
-                    <h1 className="text-3xl font-bold tracking-tight">Configurações</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Configurações</h1>
                     <p className="text-muted-foreground">
                         Gerencie suas informações pessoais e da empresa
                     </p>

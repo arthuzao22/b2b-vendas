@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DataTable, Column } from "@/components/ui/data-table";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PriceDisplay } from "@/components/ui/price-display";
@@ -264,15 +264,15 @@ export default function ListaPrecoDetalhePage() {
                         { label: lista.nome },
                     ]}
                 />
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-4">
                     <div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                             <Link href="/dashboard/fornecedor/precos">
                                 <Button variant="ghost" size="sm">
                                     <ArrowLeft className="h-4 w-4" />
                                 </Button>
                             </Link>
-                            <h1 className="text-3xl font-bold tracking-tight">{lista.nome}</h1>
+                            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{lista.nome}</h1>
                             <span
                                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${lista.ativo
                                         ? "bg-green-100 text-green-800"
@@ -292,7 +292,7 @@ export default function ListaPrecoDetalhePage() {
                             } ({lista.tipoDesconto})
                         </p>
                     </div>
-                    <Button onClick={() => setIsAddDialogOpen(true)}>
+                    <Button onClick={() => setIsAddDialogOpen(true)} className="w-full sm:w-auto">
                         <Plus className="mr-2 h-4 w-4" />
                         Adicionar Produto
                     </Button>
@@ -360,9 +360,11 @@ export default function ListaPrecoDetalhePage() {
 
             {/* Add Product Dialog */}
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <div className="p-6 max-w-md">
-                    <h2 className="text-xl font-bold mb-4">Adicionar Produto à Lista</h2>
-                    <form onSubmit={handleAddProduto} className="space-y-4">
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Adicionar Produto à Lista</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleAddProduto} className="space-y-4 px-6 pb-6">
                         <div className="space-y-2">
                             <label htmlFor="produto" className="text-sm font-medium">
                                 Produto *
@@ -411,7 +413,7 @@ export default function ListaPrecoDetalhePage() {
                             </Button>
                         </div>
                     </form>
-                </div>
+                </DialogContent>
             </Dialog>
         </div>
     );
