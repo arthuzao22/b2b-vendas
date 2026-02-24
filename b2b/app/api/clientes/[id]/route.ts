@@ -64,6 +64,11 @@ export async function GET(
           },
         },
         precosCustomizados: {
+          where: {
+            produto: {
+              fornecedorId,
+            },
+          },
           include: {
             produto: {
               select: {

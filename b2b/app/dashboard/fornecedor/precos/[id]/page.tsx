@@ -135,11 +135,11 @@ export default function ListaPrecoDetalhePage() {
         }
     };
 
-    const handleRemoveProduto = async (itemId: string) => {
+    const handleRemoveProduto = async (produtoId: string) => {
         if (!confirm("Tem certeza que deseja remover este produto da lista?")) return;
 
         try {
-            const response = await fetch(`/api/listas-preco/${listaId}/produtos/${itemId}`, {
+            const response = await fetch(`/api/listas-preco/${listaId}/produtos/${produtoId}`, {
                 method: "DELETE",
             });
 
@@ -225,7 +225,7 @@ export default function ListaPrecoDetalhePage() {
                 <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleRemoveProduto(item.id)}
+                    onClick={() => handleRemoveProduto(item.produtoId)}
                     className="text-red-600 hover:text-red-700"
                 >
                     <Trash2 className="h-4 w-4" />

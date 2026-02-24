@@ -127,7 +127,7 @@ export default function ClienteDetalhePage() {
       const data = await response.json()
 
       if (data.success) {
-        const listas = data.data?.listasPreco || data.data || []
+        const listas = data.data?.listas || []
         setListasPreco(Array.isArray(listas) ? listas : [])
       }
     } catch (error) {

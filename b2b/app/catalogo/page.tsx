@@ -21,6 +21,8 @@ interface Produto {
   sku: string;
   descricao: string | null;
   precoBase: number;
+  precoFinal: number;
+  tipoPreco: "base" | "customizado" | "lista";
   imagens: string[];
   quantidadeEstoque: number;
   categoria: {
@@ -70,14 +72,18 @@ export default function CatalogoPage() {
 
   const fetchProdutos = async () => {
     try {
-      const response = await fetch("/api/produtos");
+      const response = await fetch("/api/catalogo?limit=100");
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
           const produtosData = Array.isArray(data.data)
             ? data.data
             : data.data?.produtos || [];
-          setProdutos(produtosData);
+          setProdutos(produtosData.map((p: any) => ({
+            ...p,
+            precoBase: Number(p.precoBase),
+            precoFinal: Number(p.precoFinal),
+          })));
         }
       }
     } catch (error) {
@@ -114,7 +120,7 @@ export default function CatalogoPage() {
       id: produto.id,
       nome: produto.nome,
       sku: produto.sku,
-      preco: Number(produto.precoBase),
+      preco: produto.precoFinal || Number(produto.precoBase),
       fornecedorId: produto.fornecedor.id,
       fornecedorNome: produto.fornecedor.nomeFantasia || produto.fornecedor.razaoSocial,
       estoqueDisponivel: produto.quantidadeEstoque,
@@ -277,7 +283,21 @@ export default function CatalogoPage() {
                   )}
 
                   <div className="flex items-center justify-between pt-2 border-t">
-                    <PriceDisplay value={Number(produto.precoBase)} size="md" />
+                    <div>
+                      {produto.tipoPreco !== "base" && produto.precoFinal < produto.precoBase ? (
+                        <div className="space-y-0.5">
+                          <PriceDisplay value={produto.precoFinal} size="md" />
+                          <p className="text-xs text-muted-foreground line-through">
+                            R$ {produto.precoBase.toFixed(2)}
+                          </p>
+                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-green-50 text-green-700">
+                            {produto.tipoPreco === "customizado" ? "Preço Especial" : "Preço de Lista"}
+                          </span>
+                        </div>
+                      ) : (
+                        <PriceDisplay value={produto.precoBase} size="md" />
+                      )}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {produto.quantidadeEstoque > 0
                         ? `${produto.quantidadeEstoque} em estoque`
